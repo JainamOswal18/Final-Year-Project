@@ -56,3 +56,16 @@ PYTHONPATH=src python scripts/check_offline.py     # real model with the network
   questions before quoting accuracy in the report.
 - Not built yet: Power BI / Tableau export (patent claim 13, needs a Windows demo machine),
   fine-tuned model, login/RBAC, voice.
+
+## Open in Power BI (patent claim 13)
+
+Under every chart in Chat there is an **Open in Power BI** button. It downloads a zip of a Power BI
+Desktop project (`.pbip`) with the chart already built (a copy is also saved in `exports/`).
+
+1. Unzip it on a Windows laptop with Power BI Desktop (free).
+2. Open the `.pbip` file. If Desktop asks about preview features, enable
+   *Options > Preview features > Power BI Project (.pbip) save option* and *Store reports using enhanced metadata format (PBIR)*, then reopen.
+3. The data is embedded in the model, so nothing points at this machine and nothing is uploaded.
+
+Check the generated files against Microsoft's published schemas (needs internet):
+`PYTHONPATH=src python scripts/validate_pbip.py`

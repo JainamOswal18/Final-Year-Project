@@ -7,13 +7,14 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from locallens import demo, ingest, pipeline, prefs as prefs_store
+from locallens import demo, export_pbi, ingest, pipeline, prefs as prefs_store
 from locallens.frame import INTENTS
 from locallens.registry import Join, Registry
 from locallens.session import Session
 
 ROOT = Path(__file__).parent
 UPLOADS = ROOT / "data" / "uploads"
+EXPORTS = ROOT / "exports"
 REGISTRY_DIR = ROOT / "data" / "registry"
 
 st.set_page_config(page_title="LocalLens", layout="wide")
@@ -102,7 +103,20 @@ def page_data() -> None:
 
 
 # ---- Chat page ----------------------------------------------------------------
-def render_result(res: pipeline.Result) -> None:
+def render_export(res: pipeline.Result, key: str) -> None:
+    """Open in Power BI (claim 13): a self-contained .pbip project, zipped for download."""
+    try:
+        pbip = export_pbi.export_powerbi(res.df, res.chart, res.question, EXPORTS,
+                                         prefs_store.load().get("sort", "desc"))
+    except export_pbi.ExportError as e:
+        st.caption(f"Power BI export unavailable: {e}")
+        return
+    st.download_button("Open in Power BI (download project)", export_pbi.zip_project(pbip),
+                       file_name=f"{pbip.stem}.zip", mime="application/zip", key=f"pbi_{key}")
+    st.caption(f"Unzip, then open {pbip.name} in Power BI Desktop (Windows). Also saved in {pbip.parent}")
+
+
+def render_result(res: pipeline.Result, key: str = "") -> None:
     if res.error:
         st.warning(res.error)
         return
@@ -115,6 +129,7 @@ def render_result(res: pipeline.Result) -> None:
         if res.chart.fallback:
             st.dataframe(res.df, width="stretch")
             st.caption("I wasn't sure which chart fits, so here is the data and a best-guess chart.")
+    render_export(res, key)
     with st.expander("How I read this"):
         st.markdown(f"**Intent:** `{res.frame.intent}` &nbsp; **Chart:** `{res.chart.type}` ({res.chart.reason})")
         if res.corrections:
@@ -146,11 +161,11 @@ def page_chat() -> None:
         st.error(str(e))
         return
 
-    for q, res in st.session_state.messages:
+    for i, (q, res) in enumerate(st.session_state.messages):
         with st.chat_message("user"):
             st.write(q)
         with st.chat_message("assistant"):
-            render_result(res)
+            render_result(res, str(i))
 
     session: Session = st.session_state.session
     if session.pending:
