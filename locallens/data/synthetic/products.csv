@@ -1,0 +1,46 @@
+product_id,product_name,category,sub_category
+1,Chairs 1,Furniture,Chairs
+2,Chairs 2,Furniture,Chairs
+3,Chairs 3,Furniture,Chairs
+4,Chairs 4,Furniture,Chairs
+5,Chairs 5,Furniture,Chairs
+6,Tables 1,Furniture,Tables
+7,Tables 2,Furniture,Tables
+8,Tables 3,Furniture,Tables
+9,Tables 4,Furniture,Tables
+10,Tables 5,Furniture,Tables
+11,Bookcases 1,Furniture,Bookcases
+12,Bookcases 2,Furniture,Bookcases
+13,Bookcases 3,Furniture,Bookcases
+14,Bookcases 4,Furniture,Bookcases
+15,Bookcases 5,Furniture,Bookcases
+16,Phones 1,Technology,Phones
+17,Phones 2,Technology,Phones
+18,Phones 3,Technology,Phones
+19,Phones 4,Technology,Phones
+20,Phones 5,Technology,Phones
+21,Laptops 1,Technology,Laptops
+22,Laptops 2,Technology,Laptops
+23,Laptops 3,Technology,Laptops
+24,Laptops 4,Technology,Laptops
+25,Laptops 5,Technology,Laptops
+26,Accessories 1,Technology,Accessories
+27,Accessories 2,Technology,Accessories
+28,Accessories 3,Technology,Accessories
+29,Accessories 4,Technology,Accessories
+30,Accessories 5,Technology,Accessories
+31,Paper 1,Office Supplies,Paper
+32,Paper 2,Office Supplies,Paper
+33,Paper 3,Office Supplies,Paper
+34,Paper 4,Office Supplies,Paper
+35,Paper 5,Office Supplies,Paper
+36,Binders 1,Office Supplies,Binders
+37,Binders 2,Office Supplies,Binders
+38,Binders 3,Office Supplies,Binders
+39,Binders 4,Office Supplies,Binders
+40,Binders 5,Office Supplies,Binders
+41,Storage 1,Office Supplies,Storage
+42,Storage 2,Office Supplies,Storage
+43,Storage 3,Office Supplies,Storage
+44,Storage 4,Office Supplies,Storage
+45,Storage 5,Office Supplies,Storage

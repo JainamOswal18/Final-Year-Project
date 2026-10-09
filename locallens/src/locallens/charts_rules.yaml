@@ -1,0 +1,15 @@
+# Chart rules: first matching rule wins. Mirrors the PRD "Chart rules" table.
+# when:  intent (list), has_time (bool), max_categories / min_categories (distinct values
+#        of the first categorical column), n_numeric (exact), n_category (exact)
+rules:
+  - {when: {intent: [trend], has_time: true, n_category: 0}, chart: line}
+  - {when: {intent: [trend], has_time: true, n_category: 1, max_categories: 8}, chart: multi_line}
+  - {when: {intent: [trend], has_time: true}, chart: line}
+  - {when: {intent: [ranking]}, chart: hbar}
+  - {when: {intent: [proportion], max_categories: 6}, chart: donut}
+  - {when: {intent: [proportion]}, chart: bar}
+  - {when: {intent: [comparison], n_category: 1, max_categories: 25}, chart: bar}
+  - {when: {intent: [distribution], n_numeric: 1, n_category: 0}, chart: histogram}
+  - {when: {intent: [summary], rows: 1, n_numeric: 1}, chart: kpi}
+  - {when: {n_numeric: 2, n_category: 0, has_time: false}, chart: scatter}
+default: table_bar   # unclear -> table + best-guess bar (patent: default selection policy)

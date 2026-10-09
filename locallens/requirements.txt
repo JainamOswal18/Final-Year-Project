@@ -1,0 +1,13 @@
+streamlit>=1.40
+duckdb>=1.1
+pandas>=2.2
+pyarrow>=17
+openpyxl>=3.1
+pydantic>=2.8
+sqlglot>=25
+rapidfuzz>=3.9
+dateparser>=1.2
+pyyaml>=6
+llama-cpp-python>=0.3
+huggingface_hub>=0.25
+pytest>=8
