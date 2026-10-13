@@ -49,6 +49,29 @@ def data_today(con: duckdb.DuckDBPyConnection, reg: Registry) -> date:
     return con.execute(f'SELECT max(CAST("{d}" AS DATE)) FROM {FLAT}').fetchone()[0]
 
 
+DATA_WORDS = re.compile(
+    r"\b(?:total|sum|average|avg|mean|count|how many|number of|max|maximum|min|minimum|top|bottom|best|worst|"
+    r"highest|lowest|most|least|rank|ranking|compare|comparison|versus|vs|trend|growth|over time|distribution|"
+    r"spread|histogram|share|proportion|percent|percentage|daily|weekly|monthly|quarterly|yearly|annual|"
+    r"per|each|by)\b", re.I)
+
+
+def looks_like_data_question(pre: Preprocessed) -> bool:
+    """False for 'hi there' and other chatter: no column, value, date or analysis word in it."""
+    return bool(pre.column_hints or pre.value_mentions or pre.date_hint or pre.ambiguous_terms
+                or DATA_WORDS.search(pre.text))
+
+
+def _not_a_data_question(reg: Registry) -> str:
+    metric = (reg.tagged("metric") or [None])[0]
+    dim = (reg.tagged("dimension") or [None])[0]
+    m = metric.flat_name.replace("_", " ") if metric else "sales"
+    d = dim.flat_name.replace("_", " ") if dim else "category"
+    return ("That doesn't look like a question about your data, so I won't guess. "
+            f"Try something like: \"total {m}\", \"{m} by {d}\", \"monthly {m} for 2024\" "
+            f"or \"top 5 {d} by {m}\".")
+
+
 def _ground_filters(frame: QueryFrame, text: str, reg: Registry, prev: QueryFrame | None = None) -> None:
     """Small models invent filters. Keep a filter only if its value is literally in the question
     and, where we know the column's full value list, is a real value (normalised to real casing)."""
@@ -166,6 +189,10 @@ def ask(
         return res
     res.corrections = pre.corrections
     res.timings_ms["preprocess"] = (time.perf_counter() - t0) * 1000
+
+    if not overrides and not looks_like_data_question(pre):
+        res.error = _not_a_data_question(reg)
+        return res
 
     # a term that could mean several columns -> ask, don't guess
     if pre.ambiguous_terms and not overrides:

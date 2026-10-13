@@ -172,3 +172,18 @@ def test_filter_with_unknown_value_is_dropped_and_casing_normalised(reg, con):
     res = pipeline.ask("sales by category for consumer customers", reg, con, slm)
     assert [(f.column, f.value) for f in res.frame.filters] == [("cust_seg", "Consumer")]
     assert len(res.df) == 3
+
+
+@pytest.mark.parametrize("chatter", ["hi there", "hello", "thanks", "what is your name", "asdfgh"])
+def test_chatter_is_refused_without_calling_the_model(reg, con, chatter):
+    slm = FakeSLM({"intent": "summary", "metric": M})
+    res = pipeline.ask(chatter, reg, con, slm)
+    assert res.error and "Try something like" in res.error
+    assert res.df is None and slm.calls == []
+
+
+@pytest.mark.parametrize("q", ["total sales", "profit by region", "top 5 products by sales", "sales in 2024",
+                               "revenue", "how many orders", "what about corporate customers"])
+def test_real_questions_pass_the_gate(reg, con, q):
+    pre = preprocess(q, reg, date(2025, 12, 31))
+    assert pipeline.looks_like_data_question(pre), q
