@@ -187,3 +187,12 @@ def test_chatter_is_refused_without_calling_the_model(reg, con, chatter):
 def test_real_questions_pass_the_gate(reg, con, q):
     pre = preprocess(q, reg, date(2025, 12, 31))
     assert pipeline.looks_like_data_question(pre), q
+
+
+def test_short_message_naming_a_metric_is_a_new_question(reg):
+    s = Session()
+    s.last_frame = QueryFrame.model_validate({"intent": "summary", "metric": M})
+    assert pipeline.is_followup("by region", s, reg)             # short tweak
+    assert pipeline.is_followup("now only 2025", s, reg)
+    assert not pipeline.is_followup("profit by region", s, reg)  # names a metric -> fresh
+    assert not pipeline.is_followup("sales by category", s, reg)

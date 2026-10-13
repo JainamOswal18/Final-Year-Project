@@ -147,7 +147,7 @@ def render_result(res: pipeline.Result, key: str = "") -> None:
 
 def run_question(question: str, overrides: dict | None = None) -> None:
     session: Session = st.session_state.session
-    followup = pipeline.is_followup(question, session)
+    followup = pipeline.is_followup(question, session, st.session_state.reg)
     res = pipeline.ask(question, st.session_state.reg, st.session_state.con, get_slm(),
                        session, prefs_store.load(), followup=followup, overrides=overrides)
     st.session_state.messages.append((question, res))

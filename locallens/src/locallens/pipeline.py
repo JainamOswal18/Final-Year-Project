@@ -14,7 +14,7 @@ from . import engine
 from .charts import ChartSpec, build_spec
 from .frame import Filter, QueryFrame, TimeSpec
 from .ingest import FLAT
-from .preprocess import Preprocessed, phrase_re, preprocess
+from .preprocess import Preprocessed, _hints, phrase_re, preprocess
 from .profiler import profile
 from .registry import Registry
 from .rules import infer
@@ -156,11 +156,17 @@ def _apply_date_hint(frame: QueryFrame, pre: Preprocessed, reg: Registry) -> Non
 FOLLOWUP_STARTS = ("now", "also", "and", "only", "same", "instead", "split", "break", "what about", "how about", "but")
 
 
-def is_followup(question: str, session: Session) -> bool:
+def is_followup(question: str, session: Session, reg: Registry | None = None) -> bool:
     if session.last_frame is None:
         return False
     q = question.lower().strip()
-    return q.startswith(FOLLOWUP_STARTS) or len(q.split()) <= 3
+    if q.startswith(FOLLOWUP_STARTS):
+        return True
+    if len(q.split()) > 3:
+        return False
+    # a short message that names a metric ("profit by region") is a new question, not a tweak
+    metrics = {c.flat_name for c in reg.tagged("metric")} if reg else set()
+    return not (metrics & set(_hints(q, reg).values()))
 
 
 def _apply_overrides(frame: QueryFrame, overrides: dict[str, str]) -> None:
