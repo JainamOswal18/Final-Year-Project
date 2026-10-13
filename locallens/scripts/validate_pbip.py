@@ -1,8 +1,12 @@
 """Validate generated .pbip JSON against Microsoft's published schemas (needs internet).
 
-Usage: PYTHONPATH=src python scripts/validate_pbip.py [path/to/project-folder-or-.pbip]
+Usage: python scripts/validate_pbip.py [path/to/project-folder-or-.pbip]
 With no argument it generates a sample project per chart type and checks them all.
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import json
 import sys
 import tempfile

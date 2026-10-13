@@ -1,5 +1,9 @@
 """Smoke test: run real questions through the real model on the demo data and print timings."""
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+import sys
 import time
 
 from locallens import demo, ingest, pipeline

@@ -1,4 +1,8 @@
 """Run the REAL model + pipeline with all network connections blocked. Fails loudly if anything dials out."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import socket
 
 

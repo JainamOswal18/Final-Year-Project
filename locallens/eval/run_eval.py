@@ -4,6 +4,10 @@ Usage: PYTHONPATH=src python eval/run_eval.py [--limit N] [--show-failures]
 Reports per-field accuracy, execution accuracy (result table equals the gold frame's),
 chart-type match, and p50/p95 latency.
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import argparse
 import statistics
 import sys

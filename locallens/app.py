@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+
+sys.path.insert(0, str(Path(__file__).parent / "src"))  # so `streamlit run app.py` works without installing
 
 from locallens import demo, export_pbi, ingest, pipeline, prefs as prefs_store
 from locallens.frame import INTENTS

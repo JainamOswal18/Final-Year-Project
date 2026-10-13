@@ -68,4 +68,4 @@ Desktop project (`.pbip`) with the chart already built (a copy is also saved in 
 3. The data is embedded in the model, so nothing points at this machine and nothing is uploaded.
 
 Check the generated files against Microsoft's published schemas (needs internet):
-`PYTHONPATH=src python scripts/validate_pbip.py`
+`python scripts/validate_pbip.py`
