@@ -5,8 +5,10 @@ import zipfile
 import pandas as pd
 import pytest
 
-from locallens import export_pbi, pipeline
-from locallens.charts import ChartSpec
+from locallens.viz import export_pbi
+
+from locallens.core import pipeline
+from locallens.viz.charts import ChartSpec
 from tests.test_pipeline import FakeSLM, M
 
 FRAMES = {

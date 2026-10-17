@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from .profiler import Profile
+from ..data.profiler import Profile
 
 RULES = yaml.safe_load((Path(__file__).parent / "charts_rules.yaml").read_text())
 

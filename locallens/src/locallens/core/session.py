@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .frame import QueryFrame
+from ..query.frame import QueryFrame
 
 
 @dataclass

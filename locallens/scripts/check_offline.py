@@ -15,9 +15,13 @@ socket.socket.connect_ex = blocked
 socket.create_connection = blocked
 socket.getaddrinfo = blocked
 
-from locallens import demo, ingest, pipeline  # noqa: E402
-from locallens.session import Session  # noqa: E402
-from locallens.slm import SLM  # noqa: E402
+from locallens.data import demo
+
+from locallens.data import ingest
+
+from locallens.core import pipeline  # noqa: E402
+from locallens.core.session import Session  # noqa: E402
+from locallens.nlu.slm import SLM  # noqa: E402
 
 reg = demo.demo_registry()
 con = ingest.prepare(reg)

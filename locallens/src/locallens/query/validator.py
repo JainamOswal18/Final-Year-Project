@@ -4,17 +4,18 @@ from __future__ import annotations
 import sqlglot
 from sqlglot import exp
 
-from .frame import QueryFrame
-from .ingest import FLAT
-from .registry import Registry
+from locallens.query.frame import QueryFrame
+from ..data.ingest import FLAT
+from ..data.registry import Registry
 from .sqlgen import FrameError
 
 
 def validate_frame(frame: QueryFrame, reg: Registry) -> None:
     metrics = {c.flat_name for c in reg.tagged("metric")}
+    measures = {m.name for m in reg.active_measures()}
     dims = {c.flat_name for c in reg.tagged("dimension")}
     dates = {c.flat_name for c in reg.tagged("date")}
-    if frame.metric.column not in metrics:
+    if frame.metric.column not in metrics | measures:
         raise FrameError(f"{frame.metric.column!r} is not a metric column.")
     if frame.dimension and frame.dimension not in dims:
         raise FrameError(f"{frame.dimension!r} is not a dimension column.")
@@ -35,7 +36,7 @@ def validate_sql(sql: str, reg: Registry) -> None:
     tables = {t.name for t in parsed.find_all(exp.Table)}
     if tables != {FLAT}:
         raise FrameError(f"Query may only read {FLAT!r}, found {sorted(tables)}.")
-    allowed = {c.flat_name for c in reg.columns if c.flat_name} | {
+    allowed = {c.flat_name for c in reg.columns if c.flat_name} | {m.name for m in reg.measures} | {
         a.alias for a in parsed.find_all(exp.Alias)
     }
     unknown = {c.name for c in parsed.find_all(exp.Column)} - allowed

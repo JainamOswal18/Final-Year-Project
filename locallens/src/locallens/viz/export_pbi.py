@@ -17,8 +17,8 @@ from pathlib import Path
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype, is_integer_dtype, is_numeric_dtype
 
-from .charts import ChartSpec
-from .profiler import profile
+from locallens.viz.charts import ChartSpec
+from ..data.profiler import profile
 
 TABLE = "Result"
 SCHEMA = "https://developer.microsoft.com/json-schemas/fabric"

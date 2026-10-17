@@ -18,8 +18,8 @@ from jsonschema import Draft7Validator
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT7
 
-from locallens import export_pbi
-from locallens.charts import ChartSpec
+from locallens.viz import export_pbi
+from locallens.viz.charts import ChartSpec
 
 _cache: dict[str, dict] = {}
 

@@ -4,10 +4,10 @@ from datetime import date
 
 import pytest
 
-from locallens import pipeline
-from locallens.frame import QueryFrame
-from locallens.preprocess import preprocess, resolve_dates
-from locallens.session import Session
+from locallens.core import pipeline
+from locallens.query.frame import QueryFrame
+from locallens.nlu.preprocess import preprocess, resolve_dates
+from locallens.core.session import Session
 
 M = {"column": "sales_amt", "agg": "SUM"}
 

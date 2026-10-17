@@ -1,9 +1,9 @@
 """Deterministic frame -> SQL. ~6 templates, no model involved."""
 from __future__ import annotations
 
-from .frame import QueryFrame
-from .ingest import FLAT
-from .registry import Registry
+from locallens.query.frame import QueryFrame
+from ..data.ingest import FLAT
+from ..data.registry import Registry
 
 DEFAULT_GRAIN = "month"
 DEFAULT_TOP_N = 10
@@ -27,13 +27,23 @@ def _lit(value: str, numeric: bool) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
-def metric_alias(frame: QueryFrame) -> str:
+def metric_alias(frame: QueryFrame, reg: Registry | None = None) -> str:
+    if reg is not None and reg.measure(frame.metric.column):
+        return frame.metric.column                      # a measure is already an aggregate
     return f"{frame.metric.agg.lower()}_{frame.metric.column}"
 
 
-def _metric_expr(frame: QueryFrame) -> str:
+def _metric_expr(frame: QueryFrame, reg: Registry) -> str:
     m = frame.metric
-    return f"{m.agg}({_q(m.column)}) AS {_q(metric_alias(frame))}"
+    measure = reg.measure(m.column)
+    if measure:
+        return f"{measure.expression} AS {_q(metric_alias(frame, reg))}"
+    return f"{m.agg}({_q(m.column)}) AS {_q(metric_alias(frame, reg))}"
+
+
+def _rule_conditions(frame: QueryFrame, reg: Registry) -> list[str]:
+    """Always-on rules, plus the phrase-triggered rules the pipeline recorded on the frame."""
+    return [f"({r.condition})" for r in reg.active_rules() if not r.phrases or r.name in frame.rules]
 
 
 def _where(frame: QueryFrame, reg: Registry) -> str:
@@ -51,6 +61,7 @@ def _where(frame: QueryFrame, reg: Registry) -> str:
             conds.append(f"{_q(f.column)} IN ({vals})")
         else:
             conds.append(f"{_q(f.column)} {f.op} {_lit(f.value, numeric)}")
+    conds += _rule_conditions(frame, reg)
     return ("WHERE " + " AND ".join(conds)) if conds else ""
 
 
@@ -62,9 +73,15 @@ def _period(frame: QueryFrame) -> str:
 
 def build_sql(frame: QueryFrame, reg: Registry) -> str:
     where = _where(frame, reg)
-    value = _q(metric_alias(frame))
-    m = _metric_expr(frame)
+    value = _q(metric_alias(frame, reg))
+    m = _metric_expr(frame, reg)
     dim = _q(frame.dimension) if frame.dimension else None
+    measure = reg.measure(frame.metric.column)
+    if measure and frame.intent == "distribution":
+        raise FrameError(f"{measure.label or measure.name} is a calculated total, so it has no spread of values. "
+                         "Try a trend or a comparison.")
+    if measure and frame.intent == "proportion" and not measure.additive:
+        raise FrameError(f"{measure.label or measure.name} can't be split into shares. Try a comparison instead.")
 
     if frame.intent == "trend":
         if not frame.time:
@@ -82,7 +99,7 @@ def build_sql(frame: QueryFrame, reg: Registry) -> str:
         if frame.intent == "ranking":
             limit = f" LIMIT {int(frame.top_n or DEFAULT_TOP_N)}"
         return (f"SELECT {dim}, {m} FROM {FLAT} {where} "
-                f"GROUP BY 1 ORDER BY {value} DESC{limit}")
+                f"GROUP BY 1 ORDER BY {value} {'ASC' if frame.order == 'asc' and frame.intent == 'ranking' else 'DESC'}, 1{limit}")   # 2nd key: ties stay in a stable order
 
     if frame.intent == "distribution":
         return f"SELECT {_q(frame.metric.column)} FROM {FLAT} {where} LIMIT 100000"

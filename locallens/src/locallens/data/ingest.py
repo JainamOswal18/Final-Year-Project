@@ -6,7 +6,8 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
-from .registry import Column, Registry
+from . import semantic
+from .registry import CALC_TABLE, Column, Registry
 
 FLAT = "flat"
 MAX_VALUES = 200  # keep every distinct value of a dimension up to this many
@@ -26,6 +27,10 @@ def _read(path: str) -> pd.DataFrame:
 
 def load_tables(con: duckdb.DuckDBPyConnection, tables: dict[str, str]) -> None:
     for name, path in tables.items():
+        if Path(path).suffix.lower() == ".parquet":  # scanned in place: no copy, no load into memory
+            quoted = str(path).replace("'", "''")
+            con.execute(f'CREATE OR REPLACE VIEW "{name}" AS SELECT * FROM read_parquet(\'{quoted}\')')
+            continue
         df = _read(path)  # noqa: F841  (referenced by DuckDB replacement scan)
         con.register("_tmp_df", df)
         con.execute(f'CREATE OR REPLACE TABLE "{name}" AS SELECT * FROM _tmp_df')
@@ -52,6 +57,10 @@ def build_flat_view(con: duckdb.DuckDBPyConnection, reg: Registry) -> list[str]:
     main = reg.main_table
     select: list[str] = []
     used: set[str] = set()
+    joined = {main} | {j.right for j in reg.joins}
+    for c in reg.columns:
+        if c.table != CALC_TABLE and c.table not in joined:
+            c.flat_name = ""               # the table is not joined to the main one: its columns are unavailable
 
     def add(table: str, col: str, flat: str) -> None:
         select.append(f'"{table}"."{col}" AS "{flat}"')
@@ -75,8 +84,10 @@ def build_flat_view(con: duckdb.DuckDBPyConnection, reg: Registry) -> list[str]:
             add(j.right, c.name, flat)
             c.flat_name = flat
 
-    sql = f'CREATE OR REPLACE VIEW {FLAT} AS SELECT {", ".join(select)} FROM "{main}" ' + " ".join(joins_sql)
+    sql = f'CREATE OR REPLACE VIEW {semantic.BASE} AS SELECT {", ".join(select)} FROM "{main}" ' + " ".join(joins_sql)
     con.execute(sql)
+    con.execute(f"CREATE OR REPLACE VIEW {FLAT} AS SELECT * FROM {semantic.BASE}")
+    semantic.apply_calculated_columns(con, reg)
     return [c for c in used]
 
 
@@ -100,4 +111,5 @@ def prepare(reg: Registry, con: duckdb.DuckDBPyConnection | None = None) -> duck
     load_tables(con, reg.tables)
     build_flat_view(con, reg)
     collect_samples(con, reg)
+    reg.problems = semantic.validate_semantic(con, reg)
     return con

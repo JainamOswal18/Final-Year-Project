@@ -6,9 +6,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import sys
 import time
 
-from locallens import demo, ingest, pipeline
-from locallens.session import Session
-from locallens.slm import SLM
+from locallens.data import demo
+
+from locallens.data import ingest
+
+from locallens.core import pipeline
+from locallens.core.session import Session
+from locallens.nlu.slm import SLM
 
 QUESTIONS = sys.argv[1:] or [
     "Show monthly sales for 2024 by region",

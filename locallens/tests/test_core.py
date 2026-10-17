@@ -1,12 +1,12 @@
 """Frame -> SQL -> result -> chart, with hand-written frames (no model)."""
 import pytest
 
-from locallens import engine
-from locallens.charts import build_spec
-from locallens.frame import QueryFrame, build_schema
-from locallens.profiler import profile
-from locallens.sqlgen import FrameError, build_sql
-from locallens.validator import validate_frame, validate_sql
+from locallens.data import engine
+from locallens.viz.charts import build_spec
+from locallens.query.frame import QueryFrame, build_schema
+from locallens.data.profiler import profile
+from locallens.query.sqlgen import FrameError, build_sql
+from locallens.query.validator import validate_frame, validate_sql
 
 
 def run(reg, con, frame_dict):

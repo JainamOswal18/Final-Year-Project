@@ -1,4 +1,4 @@
-from locallens.profiler import profile  # noqa: E402
+from locallens.data.profiler import profile  # noqa: E402
 
 
 def test_flat_view_keeps_order_rowcount(reg, con):

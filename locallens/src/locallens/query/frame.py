@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from .registry import Registry
+from ..data.registry import Registry
 
 Intent = Literal["trend", "comparison", "distribution", "proportion", "ranking", "summary"]
 INTENTS: tuple[str, ...] = ("trend", "comparison", "distribution", "proportion", "ranking", "summary")
@@ -44,7 +44,9 @@ class QueryFrame(BaseModel):
     time: TimeSpec | None = None
     filters: list[Filter] = Field(default_factory=list)
     top_n: int | None = None
+    order: Literal["desc", "asc"] = "desc"            # ranking direction; set by rules, never by the model
     ambiguous: list[str] = Field(default_factory=list)  # fields the model was unsure about
+    rules: list[str] = Field(default_factory=list)      # business rules applied; set by code, never by the model
 
 
 def _nullable(schema: dict) -> dict:
@@ -53,10 +55,10 @@ def _nullable(schema: dict) -> dict:
 
 def build_schema(reg: Registry) -> dict:
     """JSON schema (for grammar-constrained decoding) limited to this dataset's columns."""
-    metrics = [c.flat_name for c in reg.tagged("metric")]
+    metrics = reg.metric_names()
     dims = [c.flat_name for c in reg.tagged("dimension")]
     dates = [c.flat_name for c in reg.tagged("date")]
-    filterable = dims + metrics
+    filterable = dims + [c.flat_name for c in reg.tagged("metric")]
     props: dict = {
         "intent": {"enum": list(INTENTS)},
         "metric": {

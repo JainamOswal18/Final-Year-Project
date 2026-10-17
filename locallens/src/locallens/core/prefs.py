@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-DEFAULT_PATH = Path(__file__).resolve().parents[2] / "prefs.json"
+DEFAULT_PATH = Path(__file__).resolve().parents[3] / "prefs.json"
 DEFAULTS: dict = {"chart_overrides": {}, "sort": "desc", "default_agg": "SUM"}
 
 
