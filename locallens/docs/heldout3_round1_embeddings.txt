@@ -1,0 +1,22 @@
+matching by meaning: on
+
+30 questions
+  intent      86.7%  (26/30)
+  execution   83.3%  (25/30)
+  latency    p50 739 ms | p95 1746 ms | max 1848 ms
+
+Failures:
+ - units sold by town
+     got {"intent":"summary","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales for each outlet
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - top 3 shops by profit
+     A ranking needs something to group by.
+ - number of pieces sold per category
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"COUNT"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - how much did each town spend
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}

@@ -1,0 +1,45 @@
+
+50 questions
+  intent      88.0%  (44/50)
+  metric      98.0%  (49/50)
+  dimension   94.0%  (47/50)
+  time        92.0%  (46/50)
+  filters     96.0%  (48/50)
+  execution   78.0%  (39/50)
+  chart       88.0%  (44/50)
+  latency    p50 725 ms | p95 1980 ms | max 2900 ms
+
+Failures:
+ - profit per quarter 2024
+     got {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"quarter","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+ - Revenue trend over the last 12 months
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-05","end":"2025-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-06","end":"2025-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+ - daily sales last month
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-11-01","end":"2025-11-30"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-12-01","end":"2025-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+ - how is profit growing year over year
+     got {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"year","start":null,"end":null},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+ - What were the sales in 2024 for the Technology category by month
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[{"column":"category","op":"=","value":"Technology"}],"top_n":null,"ambiguous":[],"rules":[]}
+ - sales by sub-category
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"sub_category","time":null,"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+ - which category has the lowest sales
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":1,"ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":1,"ambiguous":[],"rules":[]}
+ - highest revenue store
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":1,"ambiguous":[],"rules":[]}
+ - bottom 5 sub categories by profit
+     got {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"sub_category","time":null,"filters":[],"top_n":5,"ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"sub_category","time":null,"filters":[],"top_n":5,"ambiguous":[],"rules":[]}
+ - distribution of order values
+     average order value is a calculated total, so it has no spread of values. Try a trend or a comparison.
+ - how are profits distributed in 2024
+     got {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+     want {"intent":"distribution","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"ambiguous":[],"rules":[]}
+finished

@@ -1,6 +1,6 @@
 """Evaluate the real model against the gold questions.
 
-Usage: PYTHONPATH=src python eval/run_eval.py [--limit N] [--show-failures]
+Usage: python eval/run_eval.py [--set gold|heldout] [--limit N] [--show-failures]
 Reports per-field accuracy, execution accuracy (result table equals the gold frame's),
 chart-type match, and p50/p95 latency.
 """
@@ -16,18 +16,27 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from questions import QUESTIONS  # noqa: E402
+import questions as gold_set  # noqa: E402
+import heldout  # noqa: E402
+import heldout2  # noqa: E402
+import heldout3  # noqa: E402
 
-from locallens import demo, engine, ingest, pipeline  # noqa: E402
-from locallens.charts import build_spec  # noqa: E402
-from locallens.frame import QueryFrame  # noqa: E402
-from locallens.profiler import profile  # noqa: E402
-from locallens.session import Session  # noqa: E402
-from locallens.sqlgen import build_sql  # noqa: E402
+from locallens.data import demo
+
+from locallens.data import engine
+
+from locallens.data import ingest
+
+from locallens.core import pipeline  # noqa: E402
+from locallens.viz.charts import build_spec  # noqa: E402
+from locallens.query.frame import QueryFrame  # noqa: E402
+from locallens.data.profiler import profile  # noqa: E402
+from locallens.core.session import Session  # noqa: E402
+from locallens.query.sqlgen import build_sql  # noqa: E402
 
 
-def gold_result(frame: QueryFrame, reg, con) -> tuple[pd.DataFrame, str]:
-    df = engine.run(con, build_sql(frame, reg))
+def gold_result(frame: QueryFrame, reg, con, sql: str | None = None) -> tuple[pd.DataFrame, str]:
+    df = engine.run(con, sql or build_sql(frame, reg))
     return df, build_spec(df, frame.intent, profile(df)).type
 
 
@@ -49,7 +58,10 @@ def pct(n, d):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--start", type=int, default=0, help="skip the first N questions")
+    ap.add_argument("--set", choices=["gold", "heldout", "heldout2", "heldout3"], default="gold", help="which question set to run")
     ap.add_argument("--show-failures", action="store_true")
+    ap.add_argument("--no-embeddings", action="store_true", help="turn off matching by meaning (claim 7) to measure what it adds")
     args = ap.parse_args()
 
     reg = demo.demo_registry()
@@ -57,24 +69,35 @@ def main() -> None:
     today = pipeline.data_today(con, reg)
     assert today.year == 2025 and today.month >= 10, f"gold dates assume data ends in Q4 2025, got {today}"
 
-    from locallens.slm import SLM
+    from locallens.nlu.slm import SLM
 
     slm = SLM()
     slm.llm.create_chat_completion(messages=[{"role": "user", "content": "hi"}], max_tokens=1)  # warm-up
 
-    items = QUESTIONS[: args.limit]
+    term_index = None
+    emb_path = Path(__file__).resolve().parent.parent / "models" / "bge-small-en-v1.5-q8_0.gguf"
+    if not args.no_embeddings and emb_path.exists():
+        from locallens.nlu.embeddings import LlamaEmbedder, TermIndex
+
+        term_index = TermIndex(LlamaEmbedder(emb_path), reg)
+    print("matching by meaning:", "on" if term_index else "off")
+    items = {"gold": gold_set, "heldout": heldout, "heldout2": heldout2, "heldout3": heldout3}[args.set].QUESTIONS[args.start: args.limit]
     n = len(items)
     hits = dict(intent=0, metric=0, dimension=0, time=0, filters=0, execution=0, chart=0)
-    lat, fails = [], []
-    for q, gold, gold_chart in items:
+    lat, fails, asked = [], [], 0
+    for q, gold, gold_chart, *extra in items:
         g = QueryFrame.model_validate(gold)
-        gdf, _ = gold_result(g, reg, con)
-        res = pipeline.ask(q, reg, con, slm, Session())
+        gdf, _ = gold_result(g, reg, con, extra[0] if extra else None)
+        res = pipeline.ask(q, reg, con, slm, Session(), term_index=term_index)
         if res.timings_ms.get("total"):
             lat.append(res.timings_ms["total"])
         f = res.frame
+        if res.clarification:
+            asked += 1
+            fails.append((q, f"asked: {res.clarification.message}"))
+            continue
         if f is None or res.error:
-            fails.append((q, res.error or "clarification asked"))
+            fails.append((q, res.error or "no answer"))
             continue
         hits["intent"] += f.intent == g.intent
         hits["metric"] += f.metric == g.metric
@@ -85,11 +108,13 @@ def main() -> None:
         hits["execution"] += ok
         hits["chart"] += bool(res.chart) and res.chart.type == gold_chart
         if not ok:
-            fails.append((q, f"got {f.model_dump_json()}"))
+            fails.append((q, f"got {f.model_dump_json()}\n     want {g.model_dump_json()}"))
 
     print(f"\n{n} questions")
     for k, v in hits.items():
         print(f"  {k:<10} {pct(v, n)}  ({v}/{n})")
+    if asked:
+        print(f"  asked a clarifying question instead of answering: {asked} (counted as not answered above)")
     if lat:
         qs = statistics.quantiles(lat, n=20)
         print(f"  latency    p50 {statistics.median(lat):.0f} ms | p95 {qs[18]:.0f} ms | max {max(lat):.0f} ms")

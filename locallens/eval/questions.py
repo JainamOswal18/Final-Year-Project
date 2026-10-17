@@ -66,4 +66,13 @@ QUESTIONS = [
     ("show montly turnover for 2024", {"intent": "trend", "metric": S(), "time": T(Y24)}, "line"),
     ("top 5 items by earnings", {"intent": "ranking", "metric": P(), "dimension": "product_name", "top_n": 5}, "hbar"),
     ("total margin for furniture", {"intent": "summary", "metric": P(), "filters": [F("category", "Furniture")]}, "kpi"),
+    # --- semantic layer (measures, calculated column, rule phrases, synonyms)
+    ("profit margin by category", {"intent": "comparison", "metric": S("profit_margin"), "dimension": "category"}, "bar"),
+    ("average order value by store", {"intent": "comparison", "metric": S("avg_order_value"), "dimension": "store_name"}, "bar"),
+    ("monthly profit margin for 2024", {"intent": "trend", "metric": S("profit_margin"), "time": T(Y24)}, "line"),
+    ("number of orders by region", {"intent": "comparison", "metric": S("order_count"), "dimension": "store_region"}, "bar"),
+    ("top 5 products by order count", {"intent": "ranking", "metric": S("order_count"), "dimension": "product_name", "top_n": 5}, "hbar"),
+    ("share of orders by category", {"intent": "proportion", "metric": S("order_count"), "dimension": "category"}, "donut"),
+    ("what is the aov for corporate customers", {"intent": "summary", "metric": S("avg_order_value"), "filters": [F("cust_seg", "Corporate")]}, "kpi"),
+    ("sales by order size", {"intent": "comparison", "metric": S(), "dimension": "order_size"}, "bar"),
 ]

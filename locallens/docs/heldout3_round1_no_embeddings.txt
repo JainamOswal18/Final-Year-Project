@@ -1,0 +1,30 @@
+matching by meaning: off
+
+30 questions
+  intent      76.7%  (23/30)
+  execution   73.3%  (22/30)
+  latency    p50 723 ms | p95 1622 ms | max 1804 ms
+
+Failures:
+ - takings by shop
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - shop with the highest revenue
+     A ranking needs something to group by.
+ - units sold by town
+     got {"intent":"summary","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales for each outlet
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - top 3 shops by profit
+     A ranking needs something to group by.
+ - revenue by shop in 2024
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","am
+ - number of pieces sold per category
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"COUNT"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - how much did each town spend
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}

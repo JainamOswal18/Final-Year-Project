@@ -1,0 +1,30 @@
+
+40 questions
+  intent      90.0%  (36/40)
+  metric      97.5%  (39/40)
+  dimension  100.0%  (40/40)
+  time        95.0%  (38/40)
+  filters     97.5%  (39/40)
+  execution   85.0%  (34/40)
+  chart       92.5%  (37/40)
+  latency    p50 725 ms | p95 1795 ms | max 2205 ms
+
+Failures:
+ - Can you show me how sales developed over 2024?
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - I'd like to see the revenue curve for 2023
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - weekly profit in December 2025
+     got {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"week","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"week","start":"2025-12-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - daily orders in November 2025
+     got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-11-01","end":"2025-11-30"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales in the West store region by category
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[{"column":"cust_region","op":"=","value":"West"},{"column":"store_region","op":"=","value":"West"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[{"column":"store_region","op":"=","value":"West"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - show me the 3 least profitable categories
+     got {"intent":"ranking","metric":{"column":"profit_margin","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":3,"order":"asc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}

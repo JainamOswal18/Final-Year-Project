@@ -1,0 +1,18 @@
+matching by meaning: on
+
+30 questions
+  intent      90.0%  (27/30)
+  execution   86.7%  (26/30)
+  asked a clarifying question instead of answering: 3 (counted as not answered above)
+  latency    p50 780 ms | p95 2014 ms | max 2051 ms
+
+Failures:
+ - units sold by town
+     asked: I don't know what "town" refers to in this data. What should I group by?
+ - sales for each outlet
+     asked: I don't know what "outlet" refers to in this data. What should I group by?
+ - number of pieces sold per category
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"COUNT"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - how much did each town spend
+     asked: I don't know what "town" refers to in this data. What should I group by?
