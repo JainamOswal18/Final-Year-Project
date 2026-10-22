@@ -227,6 +227,34 @@ def _apply_date_hint(frame: QueryFrame, pre: Preprocessed, reg: Registry) -> Non
     frame.time = TimeSpec(column=col, grain=grain, start=h.start.isoformat(), end=h.end.isoformat())
 
 
+def _carry_over(frame: QueryFrame, prev: QueryFrame, pre: Preprocessed, reg: Registry,
+                resolved: dict[str, str]) -> QueryFrame:
+    """A follow-up changes only what it names. The small model often returns a bare frame and forgets the
+    previous one, so start from the previous frame and apply just the changes the words themselves carry."""
+    base = prev.model_copy(deep=True)
+    changed = False
+    value_cols = {c for c, _ in pre.value_mentions}
+    for col, val in pre.value_mentions:
+        if val.lower() in resolved and resolved[val.lower()] != col:
+            continue
+        base.filters = [f for f in base.filters if f.column != col] + [Filter(column=col, op="=", value=val)]
+        changed = True
+    named = [c for c in pre.column_hints.values() if c not in value_cols]
+    dims = [c for c in named if (col := reg.by_flat_name(c)) and col.tag == "dimension"]
+    if dims and dims[0] != base.dimension:
+        base.dimension = dims[0]
+        if base.intent in ("summary", "distribution"):
+            base.intent = "comparison"
+        changed = True
+    mets = [c for c in named if (col := reg.by_flat_name(c)) and col.tag == "metric"]
+    if mets:
+        base.metric = frame.metric
+        changed = True
+    if pre.date_hint:
+        changed = True
+    return base if changed else frame
+
+
 FOLLOWUP_STARTS = ("now", "also", "and", "only", "same", "instead", "split", "break", "what about", "how about", "but")
 
 
@@ -315,6 +343,8 @@ def ask(
     res.raw_frame = raw
 
     prev = session.last_frame if followup else None
+    if prev:
+        frame = _carry_over(frame, prev, pre, reg, resolved_values)
     _ground_filters(frame, pre.text, reg, prev)
     _ground_dimension(frame, pre, reg, prev)
     if not followup:

@@ -196,3 +196,18 @@ def test_short_message_naming_a_metric_is_a_new_question(reg):
     assert pipeline.is_followup("now only 2025", s, reg)
     assert not pipeline.is_followup("profit by region", s, reg)  # names a metric -> fresh
     assert not pipeline.is_followup("sales by category", s, reg)
+
+
+def test_followup_applies_only_the_named_change_when_model_forgets_previous_frame(reg, con):
+    s = Session()
+    t = {"column": "order_date", "grain": "month", "start": "2024-01-01", "end": "2024-12-31"}
+    pipeline.ask("monthly sales for 2024 by category", reg, con,
+                 FakeSLM({"intent": "trend", "metric": M, "dimension": "category", "time": t}), s)
+    # the small model returns a bare frame that has lost the trend, the dimension and the year
+    bare = FakeSLM({"intent": "summary", "metric": M})
+    res = pipeline.ask("now only for Technology", reg, con, bare, s, followup=True)
+    assert res.frame.intent == "trend" and res.frame.dimension == "category"
+    assert res.frame.time.start == "2024-01-01"
+    assert [(f.column, f.value) for f in res.frame.filters] == [("category", "Technology")]
+    res = pipeline.ask("and for 2025", reg, con, bare, s, followup=True)
+    assert res.frame.time.start == "2025-01-01" and res.frame.filters[0].value == "Technology"
