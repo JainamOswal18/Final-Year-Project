@@ -7,7 +7,9 @@ import secrets
 import time
 
 import pandas as pd
-from fastapi import APIRouter, Depends, HTTPException, Response
+from urllib.parse import quote
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from ..core import pipeline
@@ -21,6 +23,7 @@ from ..query.sqlgen import FrameError
 from ..query.validator import validate_sql
 from ..viz.adapters import ADAPTERS
 from ..viz.charts import build_spec
+from .helper import build_helper_zip, origin_of
 from .auth import admin_user, audit, current_user, runtime
 from .routes_datasets import dataset_row
 from .runtime import Runtime
@@ -213,8 +216,8 @@ def _csv_safe(v):
     return "'" + v if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") else v
 
 
-@router.get("/messages/{mid}/export/{kind}")
-def export(mid: str, kind: str, user=Depends(current_user), rt: Runtime = Depends(runtime)):
+def _load_export(rt: Runtime, user, mid: str):
+    """The answer behind an export, with its rows re-read from the dataset (access is checked here)."""
     msg = _message(rt, user, mid)
     dataset_row(rt, user, msg["dataset_id"])
     payload = json.loads(msg["response_json"])
@@ -227,14 +230,10 @@ def export(mid: str, kind: str, user=Depends(current_user), rt: Runtime = Depend
             df = engine.run(ds.con, payload["sql"])
     except FrameError as e:
         raise HTTPException(422, str(e)) from e
-    safe_name = "".join(ch if ch.isalnum() or ch in "-_ " else "" for ch in msg["question"])[:40].strip() or "result"
-    if kind == "csv":
-        out = df.copy()
-        for c in out.columns:
-            if not (pd.api.types.is_numeric_dtype(out[c]) or pd.api.types.is_datetime64_any_dtype(out[c])):
-                out[c] = out[c].map(_csv_safe)
-        return Response(out.to_csv(index=False), media_type="text/csv",
-                        headers={"Content-Disposition": f'attachment; filename="{safe_name}.csv"'})
+    return msg, payload, df
+
+
+def _bi_export(rt: Runtime, user, kind: str, msg, payload, df):
     adapter = ADAPTERS.get(kind)
     if adapter is None:
         raise HTTPException(404, "No such export.")
@@ -245,10 +244,59 @@ def export(mid: str, kind: str, user=Depends(current_user), rt: Runtime = Depend
         raise HTTPException(422, str(e)) from e
     if not adapter.supports(chart.type):
         raise HTTPException(422, f"{adapter.label} cannot show a {chart.type} chart.")
-    exp = adapter.export(df, chart, msg["question"], prefs.get("sort", "desc"))
-    audit(rt, user["id"], f"export_{kind}", mid)
+    audit(rt, user["id"], f"export_{kind}", msg["id"])
+    return adapter.export(df, chart, msg["question"], prefs.get("sort", "desc"))
+
+
+@router.get("/messages/{mid}/export/{kind}")
+def export(mid: str, kind: str, user=Depends(current_user), rt: Runtime = Depends(runtime)):
+    msg, payload, df = _load_export(rt, user, mid)
+    if kind == "csv":
+        safe_name = "".join(ch if ch.isalnum() or ch in "-_ " else "" for ch in msg["question"])[:40].strip() or "result"
+        out = df.copy()
+        for c in out.columns:
+            if not (pd.api.types.is_numeric_dtype(out[c]) or pd.api.types.is_datetime64_any_dtype(out[c])):
+                out[c] = out[c].map(_csv_safe)
+        return Response(out.to_csv(index=False), media_type="text/csv",
+                        headers={"Content-Disposition": f'attachment; filename="{safe_name}.csv"'})
+    exp = _bi_export(rt, user, kind, msg, payload, df)
     return Response(exp.content, media_type=exp.mime,
                     headers={"Content-Disposition": f'attachment; filename="{exp.filename}"'})
+
+
+# ---- one-click open in Power BI Desktop (Windows helper) ----------------------------------------------
+@router.post("/messages/{mid}/export/{kind}/link")
+def export_link(mid: str, kind: str, request: Request, user=Depends(current_user), rt: Runtime = Depends(runtime)):
+    """A single-use link the helper can download from without a cookie. Only for the person who owns the answer."""
+    if kind not in ADAPTERS:
+        raise HTTPException(404, "No such export.")
+    msg = _message(rt, user, mid)
+    dataset_row(rt, user, msg["dataset_id"])
+    token = rt.links.issue(user["id"], mid, kind)
+    url = f"{origin_of(str(request.base_url))}/api/export/dl/{token}"
+    audit(rt, user["id"], f"export_{kind}_link", mid)
+    return {"url": url, "protocol": f"locallens://open?u={quote(url, safe='')}"}
+
+
+@router.get("/export/dl/{token}")
+def export_download(token: str, rt: Runtime = Depends(runtime)):
+    grant = rt.links.redeem(token)
+    if grant is None:
+        raise HTTPException(404, "This link has expired. Click Open in Power BI again.")
+    user = rt.db.one("SELECT * FROM users WHERE id = ? AND active = 1", (grant.user_id,))
+    if user is None:
+        raise HTTPException(404, "This link has expired. Click Open in Power BI again.")
+    msg, payload, df = _load_export(rt, user, grant.message_id)
+    exp = _bi_export(rt, user, grant.kind, msg, payload, df)
+    return Response(exp.content, media_type=exp.mime,
+                    headers={"Content-Disposition": f'attachment; filename="{exp.filename}"', "Cache-Control": "no-store"})
+
+
+@router.get("/helper/windows")
+def windows_helper(request: Request, user=Depends(current_user)):
+    """The one-time installer that lets the Open in Power BI button start Power BI Desktop."""
+    return Response(build_helper_zip(origin_of(str(request.base_url))), media_type="application/zip",
+                    headers={"Content-Disposition": 'attachment; filename="LocalLens-Windows-Helper.zip"'})
 
 
 # ---- operator views ---------------------------------------------------------------------------

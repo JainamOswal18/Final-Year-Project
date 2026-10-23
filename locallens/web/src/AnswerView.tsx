@@ -57,6 +57,29 @@ export function Explanation({ a }: { a: Answer }) {
   );
 }
 
+/** On Windows the button hands the chart to Power BI Desktop through the one-time helper; elsewhere it downloads the project. */
+export function PowerBIButton({ id }: { id: string }) {
+  const toast = useToast();
+  const [tried, setTried] = useState(false);
+  const windows = /Windows/i.test(navigator.userAgent);
+  if (!windows) {
+    return <a className="btn sm" href={api.exportUrl(id, "powerbi")} title="Downloads a Power BI project. Unzip it and open the .pbip file in Power BI Desktop (Windows).">Download for Power BI</a>;
+  }
+  const open = async () => {
+    try {
+      const link = await api.exportLink(id, "powerbi");
+      setTried(true);
+      window.location.href = link.protocol;
+    } catch (e) { toast((e as Error).message, true); }
+  };
+  return (
+    <>
+      <button className="btn sm" onClick={() => void open()} title="Opens this chart in Power BI Desktop on this computer. Needs the one-time helper.">Open in Power BI</button>
+      {tried && <span className="tiny muted">Nothing opened? <a href={api.helperUrl}>Install the helper once</a>, or <a href={api.exportUrl(id, "powerbi")}>download the project</a>.</span>}
+    </>
+  );
+}
+
 export function AnswerView({ msg, canEdit, suggestions, onPick, onClarify, compact }: {
   msg: Message; canEdit: boolean; suggestions: string[]; onPick: (q: string) => void; onClarify: (q: string, field: string, option: string) => void; compact?: boolean;
 }) {
@@ -116,7 +139,7 @@ export function AnswerView({ msg, canEdit, suggestions, onPick, onClarify, compa
             <button className={view === "table" ? "on" : ""} aria-pressed={view === "table"} onClick={() => setView("table")}>Table</button>
           </div>
         )}
-        {a.exports.includes("powerbi") && <a className="btn sm" href={api.exportUrl(msg.id, "powerbi")} title="Downloads a Power BI project. Unzip it and open the .pbip file in Power BI Desktop (Windows).">Open in Power BI</a>}
+        {a.exports.includes("powerbi") && <PowerBIButton id={msg.id} />}
         {a.exports.includes("csv") && <a className="btn sm" href={api.exportUrl(msg.id, "csv")}>Download CSV</a>}
         <span className="sep" />
         {canEdit && <button className="btn sm ghost" onClick={() => void save()} disabled={saved} title="Use this question and answer as an example for the assistant">{Icon.check} {saved ? "Saved" : "Mark as correct"}</button>}

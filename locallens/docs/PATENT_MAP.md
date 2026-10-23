@@ -19,7 +19,7 @@ Status key: **Done** = built and tested. **Partial** = built, with a stated gap.
 | 10 | Config has chart ID, axis mapping, aggregation, sort, render metadata, from stored rules | Vega-Lite spec, rules file, saved preferences | **Done** | |
 | 11 | Time data to line charts, category data to bar charts | `charts_rules.yaml` | **Done** | |
 | 12 | Small model, no GPU | Qwen2.5-0.5B Q4, CPU only | **Done** | 1.0 GB peak with both models loaded (Apple M5, measured 2026-10-24). Speed measured on one machine only. |
-| 13 | Result and chart config go to Tableau or Power BI through an API adapter | `viz/adapters.py`, `viz/export_pbi.py` | **Partial** | Power BI built as a file export (`.pbip` project). Passes Microsoft's schema checks. **Not yet opened in Power BI Desktop.** No Tableau. Not a live API call. |
+| 13 | Result and chart config go to Tableau or Power BI through an API adapter | `viz/adapters.py`, `viz/export_pbi.py`, `server/helper.py` | **Partial** | Power BI built as a file export (`.pbip` project) with a Windows one-click helper (untested on Windows). Passes Microsoft's schema checks. **Not yet opened in Power BI Desktop.** No Tableau. Not a live API call. |
 | 14 | The same as claim 1, written as a method (steps 202 to 216) | `core/pipeline.py` | **Done** | |
 
 ## 2. Features in the description (not in the claims)

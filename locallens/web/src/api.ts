@@ -70,6 +70,8 @@ export const api = {
     post<{ conversation_id: string; message_id: string; response: Answer }>(`/api/datasets/${datasetId}/ask`, { question, conversation_id, overrides: overrides ?? null }),
   rate: (messageId: string, rating: number, note = "") => post(`/api/messages/${messageId}/feedback`, { rating, note }),
   saveExample: (messageId: string) => post<{ ok: boolean; already: boolean }>(`/api/messages/${messageId}/example`),
+  exportLink: (messageId: string, kind: string) => post<{ url: string; protocol: string }>(`/api/messages/${messageId}/export/${kind}/link`),
+  helperUrl: "/api/helper/windows",
   exportUrl: (messageId: string, kind: string) => `/api/messages/${messageId}/export/${kind}`,
 
   prefs: () => get<Prefs>("/api/prefs"),

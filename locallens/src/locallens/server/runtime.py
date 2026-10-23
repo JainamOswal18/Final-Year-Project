@@ -14,6 +14,7 @@ from ..data import ingest
 from ..data.registry import Registry
 from .config import Settings
 from .db import Database
+from .links import LinkStore
 from .security import LoginThrottle
 
 log = logging.getLogger("locallens")
@@ -34,6 +35,7 @@ class Runtime:
         for d in (settings.data_dir, settings.datasets_dir, settings.exports_dir, settings.log_dir):
             d.mkdir(parents=True, exist_ok=True)
         self.db = Database(settings.db_path)
+        self.links = LinkStore()
         self.throttle = LoginThrottle(settings.login_max_failures, settings.login_lock_minutes)
         self._slm_factory = slm_factory or self._default_slm
         self._slm = None
