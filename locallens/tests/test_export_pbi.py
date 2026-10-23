@@ -1,5 +1,6 @@
 """Power BI export: every chart type produces a consistent, self-contained project."""
 import json
+import re
 import zipfile
 
 import pandas as pd
@@ -54,10 +55,15 @@ def test_project_structure_and_references(reg, con, tmp_path, chart):
     assert visuals
     v = json.loads(visuals[0].read_text())["visual"]
     assert v["visualType"] == export_pbi.VISUAL[chart]
-    used = {p["field"]["Column"]["Property"] if "Column" in p["field"] else
-            p["field"]["Aggregation"]["Expression"]["Column"]["Property"]
-            for r in v["query"]["queryState"].values() for p in r["projections"]}
-    assert used <= set(data.columns)            # visuals only reference real columns
+    fields = [p["field"] for r in v["query"]["queryState"].values() for p in r["projections"]]
+    assert not any("Aggregation" in x for x in fields)       # the model discourages implicit measures
+    columns = {x["Column"]["Property"] for x in fields if "Column" in x}
+    measures = {x["Measure"]["Property"] for x in fields if "Measure" in x}
+    assert columns <= set(data.columns)         # visuals only reference real columns
+    declared = set(re.findall(r"^\tmeasure '?(.+?)'? = SUM", tmdl, re.M))
+    assert measures and measures <= declared    # and measures that the model really defines
+    for m in declared:
+        assert f"Result[{m.removeprefix('Sum of ')}]" in tmdl
 
 
 def test_data_is_embedded_not_a_path(reg, con, tmp_path):
@@ -97,3 +103,21 @@ def test_zip_contains_whole_project(reg, con, tmp_path):
     _, pbip = _run(reg, con, "bar", tmp_path)
     names = zipfile.ZipFile(__import__("io").BytesIO(export_pbi.zip_project(pbip))).namelist()
     assert any(n.endswith(".pbip") for n in names) and any(n.endswith("Result.tmdl") for n in names)
+
+
+def test_explicit_measures_replace_implicit_aggregation(tmp_path):
+    df = pd.DataFrame({"region": ["a", "b"], "sales amount": [10.5, 20.0], "orders": [3, 4]})
+    pbip = export_pbi.export_powerbi(df, ChartSpec("bar"), "sales by region", tmp_path)
+    tmdl = next(pbip.parent.rglob("Result.tmdl")).read_text()
+    assert "measure 'Sum of sales amount' = SUM(Result[sales amount])" in tmdl
+    assert "measure 'Sum of orders' = SUM(Result[orders])" in tmdl and "Sum of region" not in tmdl
+    assert "discourageImplicitMeasures" in next(pbip.parent.rglob("model.tmdl")).read_text()
+    v = json.loads(next(pbip.parent.rglob("visual.json")).read_text())["visual"]
+    y = v["query"]["queryState"]["Y"]["projections"][0]
+    assert y["field"]["Measure"]["Property"] == "Sum of sales amount" and y["queryRef"] == "Result.Sum of sales amount"
+    assert "Measure" in json.dumps(v["query"]["sortDefinition"])
+
+
+def test_readme_tells_the_user_where_the_chart_is(tmp_path):
+    pbip = export_pbi.export_powerbi(pd.DataFrame({"a": ["x"], "b": [1]}), ChartSpec("bar"), "q", tmp_path)
+    assert "Report icon" in (pbip.parent / "README.txt").read_text()

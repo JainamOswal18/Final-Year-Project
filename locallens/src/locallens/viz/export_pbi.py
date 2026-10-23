@@ -113,6 +113,16 @@ def _tmdl_name(name: str) -> str:
     return name if re.fullmatch(r"[A-Za-z_]\w*", name) else "'" + name.replace("'", "''") + "'"
 
 
+def measure_name(col: str) -> str:
+    """The model measure that adds up a column. Charts use these, never a bare column: the model switches
+    implicit measures off (discourageImplicitMeasures), so an aggregated column would not draw."""
+    return f"Sum of {col}"
+
+
+def _measure_columns(df: pd.DataFrame) -> list[str]:
+    return [c for c in df.columns if is_numeric_dtype(df[c]) and c != "point"]
+
+
 def tmdl_table(df: pd.DataFrame) -> str:
     lines = [f"table {TABLE}", f"\tlineageTag: {uuid.uuid4()}", ""]
     for c in df.columns:
@@ -122,6 +132,11 @@ def tmdl_table(df: pd.DataFrame) -> str:
             lines.append("\t\tformatString: Long Date")
         lines += [f"\t\tlineageTag: {uuid.uuid4()}", f"\t\tsummarizeBy: {summ}",
                   f"\t\tsourceColumn: {c}", ""]
+    for c in _measure_columns(df):
+        fmt = "#,0" if is_integer_dtype(df[c]) else "#,0.00"
+        ref = c.replace("]", "]]")
+        lines += [f"\tmeasure {_tmdl_name(measure_name(c))} = SUM({TABLE}[{ref}])",
+                  f"\t\tformatString: {fmt}", f"\t\tlineageTag: {uuid.uuid4()}", ""]
     m = "\n".join("\t\t\t\t" + ln for ln in _m_expression(df).split("\n"))
     lines += [f"\tpartition {TABLE} = m", "\t\tmode: import", "\t\tsource =", m, ""]
     return "\n".join(lines)
@@ -132,12 +147,15 @@ def _col(c: str) -> dict:
     return {"Column": {"Expression": {"SourceRef": {"Entity": TABLE}}, "Property": c}}
 
 
+def _measure(name: str) -> dict:
+    return {"Measure": {"Expression": {"SourceRef": {"Entity": TABLE}}, "Property": name}}
+
+
 def _proj(c: str, agg: int | None = None) -> dict:
     if agg is None:
         return {"field": _col(c), "queryRef": f"{TABLE}.{c}", "nativeQueryRef": c, "active": True}
-    fn = {SUM: "Sum", COUNT: "Count"}[agg]
-    return {"field": {"Aggregation": {"Expression": _col(c), "Function": agg}},
-            "queryRef": f"{fn}({TABLE}.{c})", "nativeQueryRef": f"{fn} of {c}"}
+    m = measure_name(c)           # `agg` says "add this column up"; the model's measure does that
+    return {"field": _measure(m), "queryRef": f"{TABLE}.{m}", "nativeQueryRef": m}
 
 
 def _sort(field: dict, direction: str) -> dict:
@@ -176,7 +194,7 @@ def build_visual(chart_type: str, df: pd.DataFrame, sort: str = "desc") -> tuple
     y = nums[0] if nums else df.columns[-1]
     qs = {"Category": {"projections": [_proj(cat)]}, "Y": {"projections": [_proj(y, SUM)]}}
     return vtype, {"queryState": qs,
-                   "sortDefinition": _sort({"Aggregation": {"Expression": _col(y), "Function": SUM}}, direction)}
+                   "sortDefinition": _sort(_measure(measure_name(y)), direction)}
 
 
 def _visual_json(name: str, vtype: str, query: dict, x: int, y: int, w: int, h: int, z: int) -> dict:
@@ -255,7 +273,11 @@ def export_powerbi(df: pd.DataFrame, chart: ChartSpec, question: str, out_dir: P
     (root / f"{name}.csv").write_text(data.to_csv(index=False), encoding="utf-8")
     _write(root / "README.txt", f"Open {name}.pbip in Power BI Desktop (Windows).\n"
                                 "The data is embedded in the model; nothing was uploaded.\n"
-                                f"{name}.csv is the same data, for reference.\n")
+                                f"{name}.csv is the same data, for reference.\n\n"
+                                "If you see only data and no chart: you may be in the Data or Model view; click the\n"
+                                "Report icon (top of the left bar). If Desktop reports an unsupported format, turn on\n"
+                                "File > Options > Preview features: the Power BI Project (.pbip) save option, TMDL\n"
+                                "format for the semantic model, and enhanced report format (PBIR). Then reopen the file.\n")
     return pbip
 
 
