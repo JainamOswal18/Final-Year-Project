@@ -44,8 +44,10 @@ class FeedbackIn(BaseModel):
 class PrefsIn(BaseModel):
     sort: str = "desc"
     chart_overrides: dict[str, str] = Field(default_factory=dict)
+    default_agg: str = "SUM"
 
 
+DEFAULT_AGGS = ("SUM", "AVG", "MAX", "MIN")
 VALID_OVERRIDE_KEYS = {"metric", "dimension", "time", "filter"}
 CHART_CHOICES = {"trend": {"line"}, "comparison": {"bar", "hbar", "donut"},
                  "ranking": {"hbar", "bar"}, "proportion": {"donut", "bar", "hbar"}}
@@ -63,13 +65,16 @@ def load_prefs(rt: Runtime, user_id: int) -> dict:
 @router.get("/prefs")
 def get_prefs(user=Depends(current_user), rt: Runtime = Depends(runtime)):
     p = load_prefs(rt, user["id"])
-    return {"sort": p["sort"], "chart_overrides": p["chart_overrides"], "choices": {k: sorted(v) for k, v in CHART_CHOICES.items()}}
+    return {"sort": p["sort"], "chart_overrides": p["chart_overrides"], "default_agg": p["default_agg"],
+            "default_aggs": list(DEFAULT_AGGS), "choices": {k: sorted(v) for k, v in CHART_CHOICES.items()}}
 
 
 @router.put("/prefs")
 def put_prefs(body: PrefsIn, user=Depends(current_user), rt: Runtime = Depends(runtime)):
     if body.sort not in ("asc", "desc"):
         raise HTTPException(422, "Sort must be asc or desc.")
+    if body.default_agg not in DEFAULT_AGGS:
+        raise HTTPException(422, f"Default aggregation must be one of {', '.join(DEFAULT_AGGS)}.")
     for intent, chart in body.chart_overrides.items():
         if chart not in CHART_CHOICES.get(intent, set()):
             raise HTTPException(422, f"{chart!r} is not available for {intent}.")
@@ -234,7 +239,10 @@ def export(mid: str, kind: str, user=Depends(current_user), rt: Runtime = Depend
     if adapter is None:
         raise HTTPException(404, "No such export.")
     prefs = load_prefs(rt, user["id"])
-    chart = build_spec(df, payload["frame"]["intent"], profile(df), prefs)
+    try:
+        chart = build_spec(df, payload["frame"]["intent"], profile(df), prefs, payload.get("chart_forced"))
+    except FrameError as e:
+        raise HTTPException(422, str(e)) from e
     if not adapter.supports(chart.type):
         raise HTTPException(422, f"{adapter.label} cannot show a {chart.type} chart.")
     exp = adapter.export(df, chart, msg["question"], prefs.get("sort", "desc"))

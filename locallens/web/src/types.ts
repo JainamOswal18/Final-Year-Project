@@ -36,10 +36,12 @@ export interface Answer extends TablePayload {
   kpi: { value: number | null; label: string } | null;
   metric: { name: string; label: string; format: "number" | "currency" | "percent"; agg: string | null; description: string } | null;
   exports: string[];
+  fiscal_start_month?: number;
 }
 export interface Message { id: string; rating: number | null; created_at: string; response: Answer }
 export interface ConversationSummary { id: string; title: string; updated_at: string }
+export interface Completion { replace: string; with: string; kind: string }
 export interface Conversation { id: string; title: string; dataset_id: string; messages: Message[] }
-export interface Prefs { sort: "asc" | "desc"; chart_overrides: Record<string, string>; choices: Record<string, string[]> }
+export interface Prefs { sort: "asc" | "desc"; chart_overrides: Record<string, string>; default_agg: string; default_aggs: string[]; choices: Record<string, string[]> }
 export interface Feedback { id: string; user: string; dataset_id: string; question: string; rating: number; note: string; created_at: string; frame: Frame | null; sql: string | null; error: string | null }
 export interface CheckResult { ok: boolean; error?: string; preview?: { value?: number | null; values?: string[]; matching?: number; of?: number } }

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { AnswerView } from "../AnswerView";
 import { LabelProvider, makeLabeler } from "../labels";
-import type { Answer, Message } from "../types";
+import type { Answer, Completion, Message } from "../types";
 import { Callout, Icon, Spinner, useAsync } from "../ui";
 import { useDataset } from "./DatasetLoader";
 
@@ -16,6 +16,8 @@ export default function AskPage() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [hints, setHints] = useState<Completion[]>([]);
+  const [pick, setPick] = useState(-1);
   const convoId = useRef<string | null>(cid ?? null);
   const loadedFor = useRef<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -60,6 +62,20 @@ export default function AskPage() {
     } finally { setBusy(false); box.current?.focus(); }
   }, [busy, detail.id, nav]);
 
+  // typeahead: finish the last word from the dataset's own column names and values
+  useEffect(() => {
+    if (!text.trim()) { setHints([]); return; }
+    let live = true;
+    const t = setTimeout(() => {
+      api.complete(detail.id, text).then((h) => { if (live) { setHints(h); setPick(-1); } }).catch(() => { if (live) setHints([]); });
+    }, 150);
+    return () => { live = false; clearTimeout(t); };
+  }, [text, detail.id]);
+  const accept = (h: Completion) => {
+    setText(text.slice(0, text.length - h.replace.length) + h.with + " ");
+    setHints([]); setPick(-1); box.current?.focus();
+  };
+
   const starters = suggestions.data ?? [];
   const modelLoading = health.data && !health.data.model_loaded && health.data.model_present;
   const noModel = health.data && !health.data.model_present;
@@ -97,10 +113,28 @@ export default function AskPage() {
       </div>
       <div className="composer">
         <div className="composer-inner">
+          {hints.length > 0 && (
+            <ul className="typeahead" role="listbox" aria-label="Suggestions">
+              {hints.map((h, i) => (
+                <li key={h.with} role="option" aria-selected={i === pick} className={i === pick ? "on" : ""}
+                  onMouseDown={(e) => { e.preventDefault(); accept(h); }}>
+                  <span>{h.with}</span><span className="faint tiny">{h.kind}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <form className="composer-box" onSubmit={(e) => { e.preventDefault(); void ask(text); }}>
             <textarea ref={box} rows={1} value={text} placeholder="Ask a question about your data…" aria-label="Your question" maxLength={500}
               onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void ask(text); } }} />
+              onKeyDown={(e) => {
+                if (hints.length) {
+                  if (e.key === "ArrowDown") { e.preventDefault(); setPick((p) => (p + 1) % hints.length); return; }
+                  if (e.key === "ArrowUp") { e.preventDefault(); setPick((p) => (p <= 0 ? hints.length - 1 : p - 1)); return; }
+                  if (e.key === "Escape") { setHints([]); return; }
+                  if (e.key === "Tab" || (e.key === "Enter" && pick >= 0)) { e.preventDefault(); accept(hints[Math.max(pick, 0)]); return; }
+                }
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void ask(text); }
+              }} />
             <button className="btn primary icon" disabled={busy || !text.trim()} aria-label="Send">{busy ? <Spinner /> : Icon.send}</button>
           </form>
           <div className="tiny faint">Runs on this server. Your data and questions are not sent anywhere else.</div>

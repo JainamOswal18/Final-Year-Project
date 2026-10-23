@@ -60,7 +60,8 @@ def result_payload(res: Result, reg: Registry, max_rows: int) -> dict:
     out: dict = {"question": res.question, "error": res.error, "corrections": [list(c) for c in res.corrections], "semantic": [list(c) for c in res.semantic],
                  "timings_ms": {k: round(v, 1) for k, v in res.timings_ms.items()}, "clarification": None,
                  "frame": None, "sql": "", "rules": [], "chart": None, "kpi": None, "metric": None,
-                 "exports": [], "columns": [], "rows": [], "row_count": 0, "truncated": False}
+                 "exports": [], "columns": [], "rows": [], "row_count": 0, "truncated": False,
+                 "fiscal_start_month": reg.fiscal_start_month, "chart_forced": res.chart_forced}
     if res.clarification:
         c = res.clarification
         out["clarification"] = {"message": c.message, "field": c.field, "options": c.options, "question": c.question}

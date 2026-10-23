@@ -5,23 +5,32 @@ import { prettify } from "../format";
 import { Callout, Field, Seg, Spinner, useAsync, useToast } from "../ui";
 import { PageHead } from "./DatasetLoader";
 
+const AGG_LABEL: Record<string, string> = { SUM: "Add them up (total)", AVG: "Average", MAX: "Highest value", MIN: "Lowest value" };
+
 function ChartPrefs() {
   const toast = useToast();
   const { data, loading, error } = useAsync(() => api.prefs(), []);
   const [sort, setSort] = useState<"asc" | "desc" | null>(null);
   const [over, setOver] = useState<Record<string, string> | null>(null);
+  const [agg, setAgg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   if (loading) return <Spinner />;
   if (error || !data) return <Callout kind="bad">{error}</Callout>;
   const curSort = sort ?? data.sort;
   const cur = over ?? data.chart_overrides;
+  const curAgg = agg ?? data.default_agg;
   const save = async () => {
     setSaving(true);
-    try { await api.savePrefs({ sort: curSort, chart_overrides: cur }); toast("Preferences saved."); } catch (e) { toast((e as Error).message, true); } finally { setSaving(false); }
+    try { await api.savePrefs({ sort: curSort, chart_overrides: cur, default_agg: curAgg }); toast("Preferences saved."); } catch (e) { toast((e as Error).message, true); } finally { setSaving(false); }
   };
   return (
     <section className="card pad stack" style={{ maxWidth: 620 }}>
       <div><h2>Charts</h2><p className="muted small">Applied to your answers. The assistant still picks the chart type that fits the result unless you choose one here.</p></div>
+      <label className="field" style={{ maxWidth: 320 }}>When a question does not say how to combine numbers
+        <select className="select" value={curAgg} onChange={(e) => setAgg(e.target.value)}>
+          {data.default_aggs.map((a) => <option key={a} value={a}>{AGG_LABEL[a] ?? a}</option>)}
+        </select>
+        <span className="muted small">"Sales by region" uses this. Words like "total", "average", "highest" in a question still win.</span></label>
       <div className="stack-sm"><strong className="small">Order of bars</strong>
         <Seg label="Sort" value={curSort} options={[{ value: "desc", label: "Largest first" }, { value: "asc", label: "Smallest first" }]} onChange={setSort} /></div>
       {Object.entries(data.choices).map(([intent, choices]) => (

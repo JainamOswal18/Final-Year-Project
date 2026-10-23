@@ -14,6 +14,7 @@ from ..data import engine
 from ..viz.charts import ChartSpec, build_spec
 from ..query.frame import Filter, QueryFrame, TimeSpec
 from ..data.ingest import FLAT
+from ..nlu.chart_request import CHART_NAMES, detect_chart, strip_chart_words
 from ..nlu.preprocess import Preprocessed, _hints, phrase_re, preprocess, unknown_group_term
 from ..data.profiler import profile
 from ..data.registry import Registry
@@ -40,6 +41,7 @@ class Result:
     semantic: list[tuple[str, str]] = field(default_factory=list)   # (word, column) understood by meaning
     timings_ms: dict[str, float] = field(default_factory=dict)
     error: str = ""
+    chart_forced: str | None = None      # the chart the user asked for in words, if any
 
 
 def data_today(con: duckdb.DuckDBPyConnection, reg: Registry) -> date:
@@ -170,7 +172,7 @@ def _add_value_filters(frame: QueryFrame, pre: Preprocessed, resolved: dict[str,
             frame.filters.append(Filter(column=col, op="=", value=val))
 
 
-def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry) -> None:
+def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_agg: str = "SUM") -> None:
     """Rule-assisted overrides: where a keyword rule fires, it beats the model."""
     dates = reg.tagged("date")
     dim_cols = {c.flat_name for c in reg.tagged("dimension")}
@@ -178,12 +180,14 @@ def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry) -> None:
     has_dim = any(c in dim_cols and c not in {v for v, _ in pre.value_mentions} for c in pre.column_hints.values())
     singular = any(_singular(pre.text, p) for p, c in pre.column_hints.items()
                    if c in dim_cols and c not in {v for v, _ in pre.value_mentions})
-    h = infer(pre.text, has_dim, bool(dates), singular)
+    h = infer(pre.text, has_dim, bool(dates), singular, default_agg)
     if h.order:
         frame.order = h.order
     if h.intent:
         frame.intent = h.intent
     frame.metric.agg = h.agg or frame.metric.agg
+    if h.agg_is_default and frame.intent == "proportion":
+        frame.metric.agg = "SUM"          # a share of an average is not a share of anything
     # a limit must come from the question (a number or a singular superlative); the model's own guess is dropped
     frame.top_n = h.top_n or None
     if frame.intent == "trend" and dates and frame.time is None:
@@ -284,6 +288,89 @@ def _apply_overrides(frame: QueryFrame, overrides: dict[str, str]) -> None:
     frame.ambiguous = []
 
 
+def _dimension_names(reg: Registry, n: int = 4) -> str:
+    return ", ".join(c.flat_name.replace("_", " ") for c in reg.tagged("dimension")[:n])
+
+
+def _adapt_for_chart(frame: QueryFrame, chart: str, reg: Registry) -> None:
+    """Change the question's frame so the chart the user asked for can be drawn from it."""
+    name = CHART_NAMES[chart]
+    if chart in ("donut", "hbar") or (chart == "bar" and frame.intent != "trend"):
+        if not frame.dimension:
+            raise FrameError(f"A {name} needs something to split by, and this question has no grouping. "
+                             f"Add one, for example by {_dimension_names(reg)}.")
+    if chart == "donut":
+        if frame.intent in ("trend", "summary", "distribution"):
+            frame.intent = "proportion"
+    elif chart == "bar":
+        if frame.intent in ("summary", "distribution"):
+            frame.intent = "comparison"       # a trend stays a trend: bars over time
+    elif chart == "hbar":
+        if frame.intent in ("trend", "summary", "distribution"):
+            frame.intent = "comparison"
+    elif chart == "histogram":
+        frame.intent, frame.dimension, frame.top_n = "distribution", None, None
+    elif chart == "line":
+        if not frame.time:
+            dates = reg.tagged("date")
+            if len(dates) != 1:
+                names = ", ".join(c.flat_name.replace("_", " ") for c in dates) or "none"
+                raise FrameError(f"A {name} needs dates along the bottom. Which date column should I use? (Date columns: {names}.)")
+            frame.time = TimeSpec(column=dates[0].flat_name, grain=None, start=None, end=None)
+        frame.intent = "trend"
+
+
+def _finish(res: Result, frame: QueryFrame, reg: Registry, con: duckdb.DuckDBPyConnection, session: Session,
+            question: str, prefs: dict | None, t0: float, force: str | None = None) -> Result:
+    """Everything after the frame is known: check it, build and run the SQL, choose the chart, remember the frame."""
+    res.frame = frame
+    try:
+        if force:
+            _adapt_for_chart(frame, force, reg)
+        validate_frame(frame, reg)
+        if frame.ambiguous:
+            field_ = frame.ambiguous[0]
+            tag = {"metric": "metric", "dimension": "dimension", "time": "date"}.get(field_)
+            if tag:
+                res.clarification = Clarification(
+                    f"I wasn't sure which {field_} you meant.", field_,
+                    [c.flat_name for c in reg.tagged(tag)], question)
+                session.pending = res.clarification
+                return res
+        t2 = time.perf_counter()
+        sql = build_sql(frame, reg)
+        validate_sql(sql, reg)
+        res.sql = sql
+        res.timings_ms["sql"] = (time.perf_counter() - t2) * 1000
+        t3 = time.perf_counter()
+        res.df = engine.run(con, sql)
+        res.timings_ms["query"] = (time.perf_counter() - t3) * 1000
+        if res.df.empty:
+            res.error = "The query returned no rows. Try a different date range or filter."
+            return res
+        res.chart = build_spec(res.df, frame.intent, profile(res.df), prefs, force)
+        res.chart_forced = force
+    except FrameError as e:
+        res.error = str(e)
+        return res
+    res.timings_ms["total"] = (time.perf_counter() - t0) * 1000
+    session.last_frame = frame
+    session.pending = None
+    session.history.append(question)
+    return res
+
+
+def _chart_only(res: Result, chart: str, reg: Registry, con: duckdb.DuckDBPyConnection, session: Session,
+                question: str, prefs: dict | None, t0: float) -> Result:
+    """'make it a pie chart': redraw the last answer. The language model is not involved."""
+    prev = session.last_frame
+    if prev is None:
+        res.error = (f"There is nothing to show as a {CHART_NAMES[chart]} yet. Ask a question first, "
+                     "for example \"sales by category\", then ask for the chart.")
+        return res
+    return _finish(res, prev.model_copy(deep=True), reg, con, session, question, prefs, t0, force=chart)
+
+
 def ask(
     question: str, reg: Registry, con: duckdb.DuckDBPyConnection, slm: FrameFiller,
     session: Session | None = None, prefs: dict | None = None, followup: bool = False,
@@ -300,6 +387,12 @@ def ask(
     res.corrections = pre.corrections
     res.semantic = pre.semantic
     res.timings_ms["preprocess"] = (time.perf_counter() - t0) * 1000
+
+    chart_word = None if overrides else detect_chart(pre.text)
+    if chart_word and not (pre.column_hints or pre.value_mentions or pre.date_hint):
+        return _chart_only(res, chart_word, reg, con, session, question, prefs, t0)
+    if chart_word:
+        pre.text = strip_chart_words(pre.text) or pre.text   # the model should not see "as a pie"
 
     if not overrides and not looks_like_data_question(pre, reg):
         res.error = _not_a_data_question(reg)
@@ -348,42 +441,11 @@ def ask(
     _ground_filters(frame, pre.text, reg, prev)
     _ground_dimension(frame, pre, reg, prev)
     if not followup:
-        _apply_rules(frame, pre, reg)
+        _apply_rules(frame, pre, reg, (prefs or {}).get("default_agg") or "SUM")
     _add_value_filters(frame, pre, resolved_values)
     _ground_metric(frame, pre, reg)
     frame.rules = _select_rules(pre.text, reg, prev)
     if overrides:
         _apply_overrides(frame, overrides)
     _apply_date_hint(frame, pre, reg)
-    res.frame = frame
-    try:
-        validate_frame(frame, reg)
-        if frame.ambiguous:
-            field_ = frame.ambiguous[0]
-            tag = {"metric": "metric", "dimension": "dimension", "time": "date"}.get(field_)
-            if tag:
-                res.clarification = Clarification(
-                    f"I wasn't sure which {field_} you meant.", field_,
-                    [c.flat_name for c in reg.tagged(tag)], question)
-                session.pending = res.clarification
-                return res
-        t2 = time.perf_counter()
-        sql = build_sql(frame, reg)
-        validate_sql(sql, reg)
-        res.sql = sql
-        res.timings_ms["sql"] = (time.perf_counter() - t2) * 1000
-        t3 = time.perf_counter()
-        res.df = engine.run(con, sql)
-        res.timings_ms["query"] = (time.perf_counter() - t3) * 1000
-        if res.df.empty:
-            res.error = "The query returned no rows. Try a different date range or filter."
-            return res
-        res.chart = build_spec(res.df, frame.intent, profile(res.df), prefs)
-    except FrameError as e:
-        res.error = str(e)
-        return res
-    res.timings_ms["total"] = (time.perf_counter() - t0) * 1000
-    session.last_frame = frame
-    session.pending = None
-    session.history.append(question)
-    return res
+    return _finish(res, frame, reg, con, session, question, prefs, t0, force=chart_word)

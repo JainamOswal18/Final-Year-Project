@@ -149,6 +149,9 @@ label.field > .hint { font-weight: 400; color: var(--faint); }
 .composer-inner { max-width: 860px; margin: 0 auto; display: grid; gap: 10px; }
 .composer-box { display: flex; gap: 8px; align-items: flex-end; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 8px 8px 8px 16px; box-shadow: var(--shadow-sm); }
 .composer-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.typeahead { list-style: none; margin: 0; padding: 4px; display: grid; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: var(--shadow-sm); max-height: 240px; overflow: auto; }
+.typeahead li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.typeahead li:hover, .typeahead li.on { background: var(--accent-soft); color: var(--accent-text); }
 .composer-box textarea { flex: 1; border: 0; outline: 0; resize: none; background: transparent; color: var(--text); font: inherit; padding: 6px 0; max-height: 140px; line-height: 1.45; }
 .empty { text-align: center; padding: 56px 16px; display: grid; gap: 14px; justify-items: center; }
 .empty h2 { font-size: 22px; } .empty .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 620px; }

@@ -1,4 +1,4 @@
-import type { Answer, CheckResult, Conversation, ConversationSummary, DatasetDetail, DatasetSummary, Feedback, Prefs, Registry, TablePayload, User } from "./types";
+import type { Answer, Completion, CheckResult, Conversation, ConversationSummary, DatasetDetail, DatasetSummary, Feedback, Prefs, Registry, TablePayload, User } from "./types";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -60,6 +60,7 @@ export const api = {
   saveRegistry: (id: string, reg: Registry) => put<{ registry: Registry; problems: string[] }>(`/api/datasets/${id}/registry`, reg),
   preview: (id: string, table: string, limit = 50) => get<TablePayload>(`/api/datasets/${id}/preview?table=${encodeURIComponent(table)}&limit=${limit}`),
   check: (id: string, kind: "measure" | "column" | "rule", expression: string) => post<CheckResult>(`/api/datasets/${id}/check-expression`, { kind, expression }),
+  complete: (id: string, q: string) => get<Completion[]>(`/api/datasets/${id}/complete?q=${encodeURIComponent(q)}`),
   suggestions: (id: string) => get<string[]>(`/api/datasets/${id}/suggestions`),
 
   conversations: (datasetId: string) => get<ConversationSummary[]>(`/api/datasets/${datasetId}/conversations`),
@@ -72,5 +73,5 @@ export const api = {
   exportUrl: (messageId: string, kind: string) => `/api/messages/${messageId}/export/${kind}`,
 
   prefs: () => get<Prefs>("/api/prefs"),
-  savePrefs: (p: { sort: string; chart_overrides: Record<string, string> }) => put<Prefs>("/api/prefs", p),
+  savePrefs: (p: { sort: string; chart_overrides: Record<string, string>; default_agg: string }) => put<Prefs>("/api/prefs", p),
 };

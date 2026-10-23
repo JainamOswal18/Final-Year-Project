@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from pydantic import BaseModel, Field
 
 from ..data import autoprep, demo, ingest, semantic
+from ..nlu import typeahead
 from ..data.registry import CALC_TABLE, IDENT, Registry
 from .auth import audit, current_user, runtime
 from .runtime import Runtime
@@ -304,6 +305,13 @@ def check_expression(dataset_id: str, body: ExpressionIn, user=Depends(current_u
     ds = rt.load_dataset(dataset_id)
     with ds.lock:
         return semantic.preview_expression(ds.con, ds.reg, body.kind, body.expression)
+
+
+@router.get("/datasets/{dataset_id}/complete")
+def complete_text(dataset_id: str, q: str = Query("", max_length=500), user=Depends(current_user), rt: Runtime = Depends(runtime)):
+    """Typeahead for the question box: column names, synonyms and category values that start like the last word typed."""
+    dataset_row(rt, user, dataset_id)
+    return typeahead.complete(q, rt.load_dataset(dataset_id).reg)
 
 
 @router.get("/datasets/{dataset_id}/suggestions")

@@ -527,3 +527,32 @@ def test_single_page_app_is_served_and_cannot_leak_files(tmp_path):
         r = c.get(attack)
         assert "TOP SECRET" not in r.text, attack
     assert c.get("/api/nothing").status_code in (404, 401)
+
+
+def test_default_aggregation_preference(admin, demo_id):
+    assert admin.get("/api/prefs").json()["default_agg"] == "SUM"
+    assert admin.put("/api/prefs", json={"sort": "desc", "default_agg": "MEDIAN"}, headers=H).status_code == 422
+    ok = admin.put("/api/prefs", json={"sort": "desc", "default_agg": "AVG"}, headers=H).json()
+    assert ok["default_agg"] == "AVG" and "AVG" in ok["default_aggs"]
+    r = ask(admin, demo_id, "compare sales by category")["response"]
+    assert r["frame"]["metric"]["agg"] == "AVG"
+    r = ask(admin, demo_id, "compare total sales by category")["response"]
+    assert r["frame"]["metric"]["agg"] == "SUM"                                           # the words win
+
+
+def test_typeahead_endpoint(admin, demo_id):
+    items = admin.get(f"/api/datasets/{demo_id}/complete", params={"q": "sales by cat"}).json()
+    assert any(i["with"].lower().startswith("categor") and i["replace"] == "cat" for i in items)
+    assert admin.get(f"/api/datasets/{demo_id}/complete", params={"q": "sales by "}).json() == []
+    assert admin.get(f"/api/datasets/{demo_id}/complete", params={"q": "x" * 600}).status_code == 422
+    assert admin.get("/api/datasets/nope/complete", params={"q": "sa"}).status_code == 404
+
+
+def test_chart_request_over_http_and_its_export(admin, demo_id):
+    first = ask(admin, demo_id, "compare sales by category")
+    cid = first["conversation_id"]
+    r = admin.post(f"/api/datasets/{demo_id}/ask", json={"question": "make it a pie chart", "conversation_id": cid}, headers=H).json()
+    assert r["response"]["chart"]["type"] == "donut" and r["response"]["chart_forced"] == "donut"
+    assert r["response"]["chart"]["reason"] == "you asked for a pie chart"
+    export = admin.get(f"/api/messages/{r['message_id']}/export/powerbi")
+    assert export.status_code == 200                                                      # exported as the chart the user chose

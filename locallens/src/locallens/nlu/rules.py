@@ -16,6 +16,7 @@ class RuleHints:
     grain: str | None = None
     top_n: int | None = None
     agg: str | None = None
+    agg_is_default: bool = False   # no aggregation word in the question: the user's saved default was used
     order: str | None = None   # "asc" for lowest/bottom/worst questions
 
 
@@ -34,7 +35,8 @@ GRAINS = [("daily", "day"), ("weekly", "week"), ("monthly", "month"), ("quarterl
           ("each month", "month"), ("by month", "month"), ("by quarter", "quarter"), ("by year", "year")]
 
 
-def infer(text: str, has_dimension_phrase: bool, has_date_column: bool, dimension_is_singular: bool = False) -> RuleHints:
+def infer(text: str, has_dimension_phrase: bool, has_date_column: bool, dimension_is_singular: bool = False,
+          default_agg: str = "SUM") -> RuleHints:
     t = text.lower()
     h = RuleHints()
 
@@ -71,8 +73,10 @@ def infer(text: str, has_dimension_phrase: bool, has_date_column: bool, dimensio
         h.agg = "MIN"
     elif re.search(r"\b(?:number of|count of)\b", t):
         h.agg = "COUNT"
-    else:
+    elif re.search(r"\b(?:total|sum|overall|altogether)\b", t):
         h.agg = "SUM"
+    else:
+        h.agg, h.agg_is_default = default_agg, True
 
     # priority order matters: first matching rule wins
     if re.search(r"\b(?:distribution|distributed|distribute|spread|histogram)\b", t):
