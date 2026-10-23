@@ -65,10 +65,16 @@ def _where(frame: QueryFrame, reg: Registry) -> str:
     return ("WHERE " + " AND ".join(conds)) if conds else ""
 
 
-def _period(frame: QueryFrame) -> str:
+def _period(frame: QueryFrame, reg: Registry) -> str:
+    """Start date of the period each row falls in. Years and quarters follow the financial calendar: shift the
+    date back so the fiscal year starts on January 1st, truncate, then shift forward again."""
     t = frame.time
     grain = (t.grain if t else None) or DEFAULT_GRAIN
-    return f"date_trunc('{grain}', CAST({_q(t.column)} AS DATE))"
+    day = f"CAST({_q(t.column)} AS DATE)"
+    shift = {"year": reg.fiscal_start_month - 1, "quarter": (reg.fiscal_start_month - 1) % 3}.get(grain, 0)
+    if not shift:
+        return f"date_trunc('{grain}', {day})"
+    return f"CAST(date_trunc('{grain}', {day} - INTERVAL {shift} MONTH) + INTERVAL {shift} MONTH AS DATE)"
 
 
 def build_sql(frame: QueryFrame, reg: Registry) -> str:
@@ -86,7 +92,7 @@ def build_sql(frame: QueryFrame, reg: Registry) -> str:
     if frame.intent == "trend":
         if not frame.time:
             raise FrameError("A trend needs a date column.")
-        period = _period(frame)
+        period = _period(frame, reg)
         if dim:
             return (f"SELECT {period} AS period, {dim}, {m} FROM {FLAT} {where} "
                     f"GROUP BY 1, 2 ORDER BY 1, 2")

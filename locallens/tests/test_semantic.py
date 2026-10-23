@@ -75,7 +75,7 @@ def test_registry_roundtrip_and_old_files_still_load(sreg, tmp_path):
     again = Registry.load(tmp_path / "r.json")
     assert [m.name for m in again.measures] == [m.name for m in sreg.measures] and again.rules[1].phrases
     legacy = Registry.model_validate({"name": "old", "main_table": "t", "columns": [{"table": "t", "name": "a"}]})
-    assert legacy.measures == [] and legacy.fiscal_start_month == 1
+    assert legacy.measures == [] and legacy.fiscal_start_month == 4
 
 
 # ---- measures --------------------------------------------------------------------
@@ -220,3 +220,65 @@ def test_measure_agg_is_normalised(sreg, scon):
     slm = FakeSLM({"intent": "comparison", "metric": {"column": "avg_order_value", "agg": "AVG"}, "dimension": "category"})
     res = pipeline.ask("average order value by category", sreg, scon, slm)
     assert res.error == "" and res.frame.metric.agg == "SUM"
+
+
+# ---- Indian financial year (April start) -------------------------------------------------
+@pytest.mark.parametrize("text, start, end", [
+    ("sales Q1 FY25", date(2024, 4, 1), date(2024, 6, 30)),
+    ("sales Q1 FY2025", date(2024, 4, 1), date(2024, 6, 30)),
+    ("sales Q1 FY 2024-25", date(2024, 4, 1), date(2024, 6, 30)),
+    ("sales FY25 Q1", date(2024, 4, 1), date(2024, 6, 30)),
+    ("sales FY2025 Q4", date(2025, 1, 1), date(2025, 3, 31)),
+    ("sales FY 2024-25", date(2024, 4, 1), date(2025, 3, 31)),
+    ("sales FY2024-25", date(2024, 4, 1), date(2025, 3, 31)),
+    ("sales financial year 2024-25", date(2024, 4, 1), date(2025, 3, 31)),
+    ("sales FY 2024-2025", date(2024, 4, 1), date(2025, 3, 31)),
+    ("sales Q2", date(2025, 7, 1), date(2025, 9, 30)),                 # today is 2025-12-31
+    ("sales Q4", date(2025, 1, 1), date(2025, 3, 31)),                 # Q4 of this FY has not started yet
+    ("sales Q1 2026", date(2025, 4, 1), date(2025, 6, 30)),            # existing convention: label = end year
+])
+def test_april_financial_year_phrasings(text, start, end):
+    h = resolve_dates(text, TODAY, 4)
+    assert (h.start, h.end) == (start, end)
+
+
+def test_january_start_uses_the_first_year_of_a_range():
+    h = resolve_dates("sales FY 2024-25", TODAY, 1)
+    assert (h.start, h.end) == (date(2024, 1, 1), date(2024, 12, 31))
+    assert resolve_dates("sales Q2", TODAY, 1).start == date(2025, 4, 1)
+
+
+def test_a_bare_year_is_still_a_calendar_year():
+    assert resolve_dates("sales in 2024", TODAY, 4).start == date(2024, 1, 1)
+
+
+def test_new_registries_default_to_april():
+    assert Registry(name="x", main_table="t").fiscal_start_month == 4
+
+
+def test_year_and_quarter_grouping_follow_the_financial_year(sreg, scon):
+    r = sreg.model_copy(deep=True)
+    r.fiscal_start_month = 4
+    t = {"column": "order_date", "grain": "year", "start": None, "end": None}
+    sql = build_sql(frame(intent="trend", dimension=None, time=t), r)
+    validate_sql(sql, r)
+    df = scon.execute(sql).df()
+    assert all(d.month == 4 and d.day == 1 for d in df["period"])         # every FY starts on 1 April
+    assert df["period"].is_monotonic_increasing and len(df) >= 3
+    total = scon.execute(build_sql(frame(intent="summary", dimension=None), r)).fetchone()[0]
+    assert abs(df.iloc[:, 1].sum() - total) < 0.01                       # no row lost or counted twice
+
+    t["grain"] = "quarter"
+    qdf = scon.execute(build_sql(frame(intent="trend", dimension=None, time=t), r)).df()
+    assert {d.month for d in qdf["period"]} <= {4, 7, 10, 1}
+    r.fiscal_start_month = 1
+    cal = scon.execute(build_sql(frame(intent="trend", dimension=None, time={**t, "grain": "year"}), r)).df()
+    assert all(d.month == 1 for d in cal["period"])                      # January start: calendar years as before
+
+
+def test_odd_fiscal_start_months_shift_quarters(sreg, scon):
+    r = sreg.model_copy(deep=True)
+    r.fiscal_start_month = 2                                              # quarters start Feb, May, Aug, Nov
+    t = {"column": "order_date", "grain": "quarter", "start": None, "end": None}
+    df = scon.execute(build_sql(frame(intent="trend", dimension=None, time=t), r)).df()
+    assert {d.month for d in df["period"]} <= {2, 5, 8, 11}

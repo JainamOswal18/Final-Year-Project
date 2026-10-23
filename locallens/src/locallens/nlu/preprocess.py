@@ -103,19 +103,70 @@ def _month_mention(t: str, today: date) -> DateHint | None:
     return None
 
 
+FYREF = r"(?:(\d{4})\s*[-–/]\s*(\d{4}|\d{2})|(\d{4}|\d{2}))"      # 2024-25, 2024/2025, 2025, 25
+_FY_WORD = r"(?:fy|financial\s+year|fiscal\s+year)"
+
+
+def _range_start_year(first: str, second: str, fiscal_start: int) -> int:
+    """A range such as 2024-25 is labelled by the year it ends in (FY25); with a January start the fiscal year
+    is the calendar year, so the first year is used."""
+    a = int(first)
+    b = int(second) if len(second) == 4 else (a // 100) * 100 + int(second)
+    if b < a:
+        b += 100
+    return a if fiscal_start == 1 else b - 1
+
+
+def _fy_ref_start_year(m: re.Match, g: int, fiscal_start: int) -> int:
+    """Start year of the fiscal year named by the three FYREF groups beginning at group g."""
+    first, second, single = m.group(g), m.group(g + 1), m.group(g + 2)
+    if first:
+        return _range_start_year(first, second, fiscal_start)
+    label = int(single) + (2000 if len(single) == 2 else 0)
+    return _label_to_start_year(label, fiscal_start)
+
+
+def _fiscal_mention(t: str, today: date, fiscal_start: int) -> DateHint | None:
+    """Q1 FY25, FY25 Q1, Q1 FY 2024-25, FY 2024-25, financial year 2024-25, Q1 2026, and a bare Q2."""
+    def quarter(start_year: int, q: int, text: str) -> DateHint:
+        s, e = _fq_bounds(start_year, q, fiscal_start)
+        return DateHint(s, e, text, "month")
+
+    m = re.search(rf"\bq([1-4])\s*(?:of\s*)?{_FY_WORD}\s*{FYREF}", t)
+    if m:
+        return quarter(_fy_ref_start_year(m, 2, fiscal_start), int(m[1]), m[0])
+    m = re.search(r"\bq([1-4])\s*(?:of\s*)?(?:(\d{4})\s*[-–/]\s*(\d{4}|\d{2})|((?:19|20)\d{2}))\b", t)
+    if m:
+        if m[2]:
+            start_year = _range_start_year(m[2], m[3], fiscal_start)
+        else:
+            start_year = _label_to_start_year(int(m[4]), fiscal_start)
+        return quarter(start_year, int(m[1]), m[0])
+    m = re.search(rf"\b{_FY_WORD}\s*{FYREF}\s*,?\s*q([1-4])\b", t)
+    if m:
+        return quarter(_fy_ref_start_year(m, 1, fiscal_start), int(m[4]), m[0])
+    m = re.search(rf"\b{_FY_WORD}\s*{FYREF}", t)
+    if m:
+        s, e = _fy_bounds(_fy_ref_start_year(m, 1, fiscal_start), fiscal_start)
+        return DateHint(s, e, m[0], "month")
+    m = re.search(r"\bq([1-4])\b", t)
+    if m:
+        # no year given: the most recent such quarter that has started on or before today
+        fy_now = _fy_start_year(today, fiscal_start)
+        s, e = _fq_bounds(fy_now, int(m[1]), fiscal_start)
+        if s > today:
+            s, e = _fq_bounds(fy_now - 1, int(m[1]), fiscal_start)
+        return DateHint(s, e, m[0], "month")
+    return None
+
+
 def resolve_dates(text: str, today: date, fiscal_start: int = 1) -> DateHint | None:
     t = text.lower()
     fy_now = _fy_start_year(today, fiscal_start)
     q_now = ((today.month - fiscal_start) % 12) // 3 + 1
-    m = re.search(r"\bq([1-4])\s*(?:of\s*)?(?:fy\s*)?((?:19|20)\d{2})\b", t)
-    if m:
-        s, e = _fq_bounds(_label_to_start_year(int(m[2]), fiscal_start), int(m[1]), fiscal_start)
-        return DateHint(s, e, m[0], "month")
-    m = re.search(r"\bfy\s*((?:19|20)?\d{2})\b", t)
-    if m:
-        label = int(m[1]) + (2000 if len(m[1]) == 2 else 0)
-        s, e = _fy_bounds(_label_to_start_year(label, fiscal_start), fiscal_start)
-        return DateHint(s, e, m[0], "month")
+    hit = _fiscal_mention(t, today, fiscal_start)
+    if hit:
+        return hit
     if "last quarter" in t or "previous quarter" in t:
         y, qq = (fy_now - 1, 4) if q_now == 1 else (fy_now, q_now - 1)
         s, e = _fq_bounds(y, qq, fiscal_start)

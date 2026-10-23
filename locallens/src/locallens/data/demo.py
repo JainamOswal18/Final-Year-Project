@@ -82,4 +82,5 @@ def demo_registry(data_dir: Path = DATA_DIR) -> Registry:
         raise FileNotFoundError(f"No synthetic data in {data_dir}. Run: python scripts/make_synthetic_data.py")
     reg = ingest.new_registry_from_files("retail_demo", tables, "orders")
     reg.joins = list(JOINS)
+    reg.fiscal_start_month = 1   # the demo and its evaluation questions use calendar years
     return add_semantic(apply_demo_tags(reg))

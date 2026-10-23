@@ -28,6 +28,16 @@ export function vegaConfig() {
 type Enc = Record<string, { field?: string; type?: string; title?: string; axis?: Record<string, unknown>; [k: string]: unknown }>;
 
 /** Turn the server's bare spec into a drawable one: data, titles, number formats, tooltips. */
+/** Vega label expression for financial-year axes: "FY25" for years, "Q1 FY25" for quarters.
+ *  A fiscal year is named after the calendar year it ends in. Returns null for calendar years and other grains. */
+export function fiscalLabelExpr(grain: string | null | undefined, startMonth: number | undefined): string | null {
+  if (!startMonth || startMonth === 1 || (grain !== "year" && grain !== "quarter")) return null;
+  const m0 = startMonth - 1;
+  const fy = `slice(toString(utcyear(datum.value) + (utcmonth(datum.value) >= ${m0} ? 1 : 0)), 2)`;
+  if (grain === "year") return `'FY' + ${fy}`;
+  return `'Q' + (floor(((utcmonth(datum.value) - ${m0} + 12) % 12) / 3) + 1) + ' FY' + ${fy}`;
+}
+
 export function buildSpec(answer: Answer, fmt: Fmt, grain: string | null | undefined, label: (n: string) => string = (n) => n): Record<string, unknown> {
   const spec = JSON.parse(JSON.stringify(answer.chart?.spec ?? {})) as Record<string, unknown> & { encoding?: Enc };
   const names = answer.columns.map((c) => c.name);
@@ -46,7 +56,10 @@ export function buildSpec(answer: Answer, fmt: Fmt, grain: string | null | undef
       const n = new Set(values.map((v) => v[e.field!])).size;
       e.axis = { ...(e.axis ?? {}), ...(channel === "x" ? { labelAngle: n <= 5 ? 0 : -40, labelLimit: n <= 5 ? 140 : 100 } : { labelLimit: 220 }) };
     }
-    if (kind[e.field] === "temporal") e.axis = { ...(e.axis ?? {}), format: grain === "year" ? "%Y" : grain === "quarter" || grain === "month" ? "%b %Y" : "%d %b %Y" };
+    if (kind[e.field] === "temporal") {
+      const fy = fiscalLabelExpr(grain, answer.fiscal_start_month);
+      e.axis = fy ? { ...(e.axis ?? {}), labelExpr: fy } : { ...(e.axis ?? {}), format: grain === "year" ? "%Y" : grain === "quarter" || grain === "month" ? "%b %Y" : "%d %b %Y" };
+    }
     if (channel === "color" && e.field && !("legend" in e)) e.legend = { title: e.title };
     const t: Record<string, unknown> = { field: e.field, type: e.type, title: e.title };
     if (kind[e.field] === "numeric") t.format = numFmt;

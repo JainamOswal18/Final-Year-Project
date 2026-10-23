@@ -85,7 +85,7 @@ class Registry(BaseModel):
     tables: dict[str, str] = Field(default_factory=dict)  # table -> file path
     columns: list[Column] = Field(default_factory=list)
     joins: list[Join] = Field(default_factory=list)
-    fiscal_start_month: int = Field(default=1, ge=1, le=12)
+    fiscal_start_month: int = Field(default=4, ge=1, le=12)   # Indian financial year; saved datasets keep their own value
     measures: list[Measure] = Field(default_factory=list)
     rules: list[Rule] = Field(default_factory=list)
     examples: list[Example] = Field(default_factory=list)
