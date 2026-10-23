@@ -6,6 +6,7 @@ data never leaves it. Built from the patent *"A System and Method for Privacy-Pr
 Language-to-Visualization Conversion"*.
 
 * **For people who ask questions:** a web app with sign-in, chats, charts, an explanation of how each answer was read, and export to Power BI or CSV.
+* **Ask in the words you use:** "Q1 FY25", "financial year 2024-25", "make it a pie chart", "now only for Technology". The financial year starts in April unless the dataset says otherwise.
 * **For people who own the data:** upload files, say what each column means, and teach it your business: your own metrics, rules, financial year and examples.
 * **For the project report:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (design, security, patent claim map) and [`docs/EVAL.md`](docs/EVAL.md) (accuracy, measured honestly).
 

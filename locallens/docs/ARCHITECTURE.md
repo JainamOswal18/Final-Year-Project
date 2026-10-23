@@ -107,6 +107,13 @@ One process (FastAPI) serves the API and the built React app. State:
 * Very large uploads are limited by the size cap, not by a row limit; an Excel "zip bomb" is not specifically defended against.
 * There is no single sign-on or password-reset email; an administrator resets passwords.
 
+## Features added after the first claim map
+
+* **Financial calendar.** `Registry.fiscal_start_month` defaults to 4 (Indian financial year; a dataset keeps its saved value). Dates such as "Q1 FY25", "FY25 Q1", "FY 2024-25", "financial year 2024-25" and a bare "Q2" are read by `resolve_dates`; "Q1 2026" still means the quarter in the year that ends in 2026. Year and quarter grouping in SQL follow the same calendar (`query/sqlgen.py::_period`), and chart axes read "FY25" / "Q1 FY25" (`web/src/Chart.tsx`). The demo dataset keeps a January start so its evaluation questions stay comparable.
+* **Chart requests in chat.** "Make it a pie chart" redraws the previous answer without calling the model; "sales by region as a pie" applies the chart to a new question. Charts that cannot fit the data are refused with a reason.
+* **Default aggregation.** A per-user preference used only when the question has no aggregation word (total, average, maximum, ...). A share is always a sum.
+* **Typeahead.** The question box finishes column names, synonyms and category values (`nlu/typeahead.py`, `GET /api/datasets/{id}/complete`).
+
 ## Patent claim map
 
 | Claim | What it says (short) | Where | Status |
@@ -117,7 +124,7 @@ One process (FastAPI) serves the API and the built React app. State:
 | 4 | classify into trend, comparison, distribution, proportion, ranking, summary | model + `nlu/rules.py` | built |
 | 5, 8 | SQL from a predefined template, schema check before running | `query/sqlgen.py`, `query/validator.py` | built |
 | 6 | result analysis: columns, types, time order, cardinality | `data/profiler.py` | built (aggregation level and dimensionality are implied by the question type, not measured separately) |
-| 7 | domain-adapted with locally stored embeddings; fixed context window | `nlu/embeddings.py`; `nlu/slm.py` fits the prompt to 2048 tokens | built, modest: matches about a third of unseen paraphrases, never guesses (see `docs/EVAL.md`). It adapts the *input vocabulary*; the model itself is not fine-tuned |
-| 9, 10, 11 | chart chosen by rule from dimensions, time, aggregation; axis, sort, rendering metadata; time to line, categories to bar | `viz/charts.py` + `charts_rules.yaml`; Vega-Lite spec; saved preferences | built |
+| 7 | domain-adapted with locally stored embeddings; fixed context window | `nlu/embeddings.py`, `data/semantic.py`, `nlu/slm.py` (prompt fitted to 2048 tokens) | built: **domain-adapted via locally stored embeddings and a semantic layer** (custom metrics, calculated columns, business rules, descriptions, verified examples). Embeddings match about a third of unseen paraphrases and never guess (see `docs/EVAL.md`). The model weights are not fine-tuned; that described embodiment is deliberately left out |
+| 9, 10, 11 | chart chosen by rule from dimensions, time, aggregation; axis, sort, rendering metadata; time to line, categories to bar | `viz/charts.py` + `charts_rules.yaml`; Vega-Lite spec; saved preferences (sort, chart per question type, default aggregation) | built. A user can also ask for a chart in words ("make it a pie chart"): `nlu/chart_request.py` finds the word, `core/pipeline.py` adapts the question's frame, and `viz/charts.py` checks the chart fits the result or explains why not |
 | 12 | small model, no GPU | Qwen2.5-0.5B Q4, `n_gpu_layers=0` | built; speed measured on one laptop only |
 | 13 | result and chart configuration go to Tableau **or** Power BI through an API adapter | `viz/adapters.py` (`BIAdapter`), `viz/export_pbi.py` | **Power BI: built as a file adapter** (a Power BI project that Desktop opens). It does not call a Power BI service API, and it has not been opened in Power BI Desktop yet. Tableau not built (the claim says "at least one") |
