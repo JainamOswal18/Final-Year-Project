@@ -8,6 +8,8 @@ import pandas as pd
 import yaml
 
 from ..data.profiler import Profile
+from ..nlu.chart_request import CHART_NAMES
+from ..query.sqlgen import FrameError
 
 RULES = yaml.safe_load((Path(__file__).parent / "charts_rules.yaml").read_text())
 
@@ -34,8 +36,47 @@ def _matches(when: dict, intent: str, p: Profile) -> bool:
     return all(checks[k](v) for k, v in when.items())
 
 
-def pick_chart(intent: str, p: Profile, prefs: dict | None = None) -> tuple[str, str, bool]:
-    """Returns (chart type, reason, used_default)."""
+MAX_PIE_SLICES = 12
+
+
+def check_fits(chart: str, p: Profile) -> str:
+    """The chart the user asked for, checked against the shape of the result. Returns the chart to draw
+    (a line chart with a category is a multi-line chart) or raises FrameError saying why it does not fit."""
+    name = CHART_NAMES.get(chart, chart)
+    cats, nums, t = p.category_cols, p.numeric_cols, p.time_col
+    shape = f"This result has {len(cats)} category column(s), {len(nums)} number column(s)" + (" and a date." if t else ".")
+    if not nums:
+        raise FrameError(f"A {name} needs a number to draw, and this result has none.")
+    if chart == "donut":
+        if not cats or t:
+            raise FrameError(f"A {name} shows how one total splits across categories, so it needs one category and no dates. {shape}")
+        if p.cardinality[cats[0]] > MAX_PIE_SLICES:
+            raise FrameError(f"A {name} with {p.cardinality[cats[0]]} slices is unreadable. Ask for the top 5, or use a bar chart.")
+        return "donut"
+    if chart == "hbar":
+        if not cats or t:
+            raise FrameError(f"A {name} needs one category to list. {shape}")
+        return "hbar"
+    if chart == "bar":
+        if not cats and not t:
+            raise FrameError(f"A {name} needs a category or a date for the bars. {shape}")
+        return "bar"
+    if chart == "histogram":
+        if len(nums) != 1 or cats or t:
+            raise FrameError(f"A {name} shows how single values are spread, so it needs one column of numbers and nothing else. {shape}")
+        return "histogram"
+    if chart == "line":
+        if not t:
+            raise FrameError(f"A {name} needs dates along the bottom, and this result has no date column. {shape}")
+        return "multi_line" if cats else "line"
+    raise FrameError(f"I can't draw a {name} here.")
+
+
+def pick_chart(intent: str, p: Profile, prefs: dict | None = None, force: str | None = None) -> tuple[str, str, bool]:
+    """Returns (chart type, reason, used_default). `force` is a chart the user asked for in words."""
+    if force:
+        chart = check_fits(force, p)
+        return chart, f"you asked for a {CHART_NAMES.get(force, force)}", False
     override = (prefs or {}).get("chart_overrides", {}).get(intent)
     for rule in RULES["rules"]:
         if _matches(rule["when"], intent, p):
@@ -52,8 +93,8 @@ def _compatible(override: str, chosen: str) -> bool:
     return any(override in g and chosen in g for g in groups)
 
 
-def build_spec(df: pd.DataFrame, intent: str, p: Profile, prefs: dict | None = None) -> ChartSpec:
-    chart, reason, fallback = pick_chart(intent, p, prefs)
+def build_spec(df: pd.DataFrame, intent: str, p: Profile, prefs: dict | None = None, force: str | None = None) -> ChartSpec:
+    chart, reason, fallback = pick_chart(intent, p, prefs, force)
     t = p.time_col
     nums = p.numeric_cols
     cats = p.category_cols
@@ -69,6 +110,12 @@ def build_spec(df: pd.DataFrame, intent: str, p: Profile, prefs: dict | None = N
         spec = {"mark": {"type": "line", "point": True},
                 "encoding": {"x": {"field": t, "type": "temporal"}, "y": {"field": y, "type": "quantitative"},
                              "color": {"field": cats[0], "type": "nominal"}}}
+    elif chart == "bar" and t and force:
+        # bars over time: the date is the x axis, a category (if any) splits each bar into colours
+        enc = {"x": {"field": t, "type": "temporal"}, "y": {"field": y, "type": "quantitative"}}
+        if cats:
+            enc["color"] = {"field": cats[0], "type": "nominal"}
+        spec = {"mark": "bar", "encoding": enc}
     elif chart in ("bar", "table_bar"):
         x = cats[0] if cats else (df.columns[0])
         sort = "-y" if desc == "desc" else "y"

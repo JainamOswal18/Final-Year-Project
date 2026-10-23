@@ -167,6 +167,11 @@ def build_visual(chart_type: str, df: pd.DataFrame, sort: str = "desc") -> tuple
         return vtype, {"queryState": {"Category": {"projections": [_proj("point")]},
                                       "X": {"projections": [_proj(xy[0], SUM)]},
                                       "Y": {"projections": [_proj(xy[1], SUM)]}}}
+    if chart_type == "bar" and t:
+        qs = {"Category": {"projections": [_proj(t)]}, "Y": {"projections": [_proj(nums[0], SUM)]}}
+        if cats:
+            qs["Series"] = {"projections": [_proj(cats[0])]}
+        return vtype, {"queryState": qs, "sortDefinition": _sort(_col(t), "Ascending")}
     cat = cats[0] if cats else df.columns[0]
     y = nums[0] if nums else df.columns[-1]
     qs = {"Category": {"projections": [_proj(cat)]}, "Y": {"projections": [_proj(y, SUM)]}}
