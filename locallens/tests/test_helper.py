@@ -95,3 +95,8 @@ def test_link_needs_sign_in_csrf_and_ownership(admin, demo_id):
 
 def test_a_made_up_token_is_refused(client):
     assert client.get("/api/export/dl/" + "x" * 32).status_code == 404
+
+
+def test_open_script_accepts_the_link_forms_browsers_produce():
+    from locallens.server.helper import OPEN_SCRIPT
+    assert "locallens:(//)?open/?" in OPEN_SCRIPT       # locallens://open?u=, locallens://open/?u=, locallens:open?u=

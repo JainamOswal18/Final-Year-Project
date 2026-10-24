@@ -27,8 +27,11 @@ try {
     $root = Join-Path $env:LOCALAPPDATA 'LocalLens'
     $cfg = Get-Content (Join-Path $root 'config.json') -Raw | ConvertFrom-Json
 
-    if ($Link -notmatch '^locallens://open\?') { Fail 'This is not a LocalLens link.' }
+    # browsers may rewrite locallens://open?u=... as locallens://open/?u=... or drop the slashes
+    $Link = "$Link".Trim().Trim('"')
+    if ($Link -notmatch '^locallens:(//)?open/?\?') { Fail ('This is not a LocalLens link. Received: ' + $Link) }
     $query = [System.Web.HttpUtility]::ParseQueryString($Link.Substring($Link.IndexOf('?') + 1))
+    if (-not $query['u']) { Fail 'The link has no download address.' }
     $u = [Uri]$query['u']
 
     # only the server this helper was installed for, and only the one-time download path
