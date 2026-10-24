@@ -276,6 +276,8 @@ def export_powerbi(df: pd.DataFrame, chart: ChartSpec, question: str, out_dir: P
                                 f"Then open {name}.pbip in Power BI Desktop (Windows).\n"
                                 "The data is embedded in the model; nothing was uploaded.\n"
                                 f"{name}.csv is the same data, for reference.\n\n"
+                                "FIRST TIME IN POWER BI: click 'Refresh now' in the yellow banner (or Home > Refresh). A project holds no\n"
+                                "data until it is refreshed once; the data comes from inside the project, nothing is downloaded.\n\n"
                                 "If you see only data and no chart: you may be in the Data or Model view; click the\n"
                                 "Report icon (top of the left bar). If Desktop reports an unsupported format, turn on\n"
                                 "File > Options > Preview features: the Power BI Project (.pbip) save option, TMDL\n"

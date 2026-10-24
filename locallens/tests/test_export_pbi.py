@@ -121,3 +121,8 @@ def test_explicit_measures_replace_implicit_aggregation(tmp_path):
 def test_readme_tells_the_user_where_the_chart_is(tmp_path):
     pbip = export_pbi.export_powerbi(pd.DataFrame({"a": ["x"], "b": [1]}), ChartSpec("bar"), "q", tmp_path)
     assert "Report icon" in (pbip.parent / "README.txt").read_text()
+
+
+def test_readme_says_to_refresh_once(tmp_path):
+    pbip = export_pbi.export_powerbi(pd.DataFrame({"a": ["x"], "b": [1]}), ChartSpec("bar"), "q", tmp_path)
+    assert "Refresh now" in (pbip.parent / "README.txt").read_text()

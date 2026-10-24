@@ -75,7 +75,7 @@ export function PowerBIButton({ id }: { id: string }) {
   return (
     <>
       <button className="btn sm" onClick={() => void open()} title="Opens this chart in Power BI Desktop on this computer. Needs the one-time helper.">Open in Power BI</button>
-      {tried && <span className="tiny muted">Nothing opened? <a href={api.helperUrl}>Install the helper once</a>, or <a href={api.exportUrl(id, "powerbi")}>download the project</a> (right-click the zip, Extract All, then open the .pbip).</span>}
+      {tried && <span className="tiny muted">When Power BI opens, click Refresh now once to load the data. Nothing opened? <a href={api.helperUrl}>Install the helper once</a>, or <a href={api.exportUrl(id, "powerbi")}>download the project</a> (right-click the zip, Extract All, then open the .pbip).</span>}
     </>
   );
 }
