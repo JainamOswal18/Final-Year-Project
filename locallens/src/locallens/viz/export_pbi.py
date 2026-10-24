@@ -271,7 +271,9 @@ def export_powerbi(df: pd.DataFrame, chart: ChartSpec, question: str, out_dir: P
     _write(pbip, {"$schema": f"{SCHEMA}/pbip/pbipProperties/1.0.0/schema.json", "version": "1.0",
                   "artifacts": [{"report": {"path": f"{name}.Report"}}], "settings": {"enableAutoRecovery": True}})
     (root / f"{name}.csv").write_text(data.to_csv(index=False), encoding="utf-8")
-    _write(root / "README.txt", f"Open {name}.pbip in Power BI Desktop (Windows).\n"
+    _write(root / "README.txt", "EXTRACT THE WHOLE ZIP FIRST (right-click > Extract All). Opening the .pbip from inside the\n"
+                                "zip fails with 'Required artifact is missing', because its sibling folders are not unpacked.\n\n"
+                                f"Then open {name}.pbip in Power BI Desktop (Windows).\n"
                                 "The data is embedded in the model; nothing was uploaded.\n"
                                 f"{name}.csv is the same data, for reference.\n\n"
                                 "If you see only data and no chart: you may be in the Data or Model view; click the\n"
