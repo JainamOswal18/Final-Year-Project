@@ -62,6 +62,9 @@ def main() -> None:
     ap.add_argument("--set", choices=["gold", "heldout", "heldout2", "heldout3"], default="gold", help="which question set to run")
     ap.add_argument("--show-failures", action="store_true")
     ap.add_argument("--no-embeddings", action="store_true", help="turn off matching by meaning (claim 7) to measure what it adds")
+    ap.add_argument("--rules", choices=list(pipeline.RULES_MODES), default="always",
+                    help="always: rules also decide when no keyword fires; fired: only when one fires; off: no keyword rules")
+    ap.add_argument("--model", type=Path, help="GGUF file to test instead of the default (e.g. a fine-tuned model)")
     args = ap.parse_args()
 
     reg = demo.demo_registry()
@@ -71,7 +74,8 @@ def main() -> None:
 
     from locallens.nlu.slm import SLM
 
-    slm = SLM()
+    slm = SLM(args.model) if args.model else SLM()
+    print("model:", args.model or "default", "| rules:", args.rules)
     slm.llm.create_chat_completion(messages=[{"role": "user", "content": "hi"}], max_tokens=1)  # warm-up
 
     term_index = None
@@ -84,13 +88,19 @@ def main() -> None:
     items = {"gold": gold_set, "heldout": heldout, "heldout2": heldout2, "heldout3": heldout3}[args.set].QUESTIONS[args.start: args.limit]
     n = len(items)
     hits = dict(intent=0, metric=0, dimension=0, time=0, filters=0, execution=0, chart=0)
+    raw_hits = dict(intent=0, metric_column=0, dimension=0)   # the model's own answer, before rules and grounding
     lat, fails, asked = [], [], 0
     for q, gold, gold_chart, *extra in items:
         g = QueryFrame.model_validate(gold)
         gdf, _ = gold_result(g, reg, con, extra[0] if extra else None)
-        res = pipeline.ask(q, reg, con, slm, Session(), term_index=term_index)
+        res = pipeline.ask(q, reg, con, slm, Session(), term_index=term_index, rules_mode=args.rules)
         if res.timings_ms.get("total"):
             lat.append(res.timings_ms["total"])
+        if res.raw_frame:
+            rf = QueryFrame.model_validate_json(res.raw_frame)
+            raw_hits["intent"] += rf.intent == g.intent
+            raw_hits["metric_column"] += rf.metric.column == g.metric.column
+            raw_hits["dimension"] += rf.dimension == g.dimension
         f = res.frame
         if res.clarification:
             asked += 1
@@ -108,11 +118,12 @@ def main() -> None:
         hits["execution"] += ok
         hits["chart"] += bool(res.chart) and res.chart.type == gold_chart
         if not ok:
-            fails.append((q, f"got {f.model_dump_json()}\n     want {g.model_dump_json()}"))
+            fails.append((q, f"got {f.model_dump_json()}\n     want {g.model_dump_json()}\n     model {res.raw_frame}"))
 
     print(f"\n{n} questions")
     for k, v in hits.items():
         print(f"  {k:<10} {pct(v, n)}  ({v}/{n})")
+    print("  model alone (before rules):", ", ".join(f"{k} {pct(v, n).strip()}" for k, v in raw_hits.items()))
     if asked:
         print(f"  asked a clarifying question instead of answering: {asked} (counted as not answered above)")
     if lat:

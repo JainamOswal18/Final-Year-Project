@@ -67,6 +67,21 @@ def build_schema(reg: Registry) -> dict:
             "required": ["column", "agg"],
         },
         "dimension": {"enum": dims + [None]} if dims else {"type": "null"},
+    }
+    if dates:   # same field order as QueryFrame and the prompt's examples: the grammar follows this order
+        props["time"] = _nullable(
+            {
+                "type": "object",
+                "properties": {
+                    "column": {"enum": dates},
+                    "grain": {"enum": list(GRAINS) + [None]},
+                    "start": _nullable({"type": "string"}),
+                    "end": _nullable({"type": "string"}),
+                },
+                "required": ["column", "grain", "start", "end"],
+            }
+        )
+    props |= {
         "filters": {
             "type": "array",
             "maxItems": 3,
@@ -83,19 +98,4 @@ def build_schema(reg: Registry) -> dict:
         "top_n": _nullable({"type": "integer"}),
         "ambiguous": {"type": "array", "maxItems": 3, "items": {"enum": ["metric", "dimension", "time", "filters"]}},
     }
-    required = ["intent", "metric", "dimension", "filters", "top_n", "ambiguous"]
-    if dates:
-        props["time"] = _nullable(
-            {
-                "type": "object",
-                "properties": {
-                    "column": {"enum": dates},
-                    "grain": {"enum": list(GRAINS) + [None]},
-                    "start": _nullable({"type": "string"}),
-                    "end": _nullable({"type": "string"}),
-                },
-                "required": ["column", "grain", "start", "end"],
-            }
-        )
-        required.append("time")
-    return {"type": "object", "properties": props, "required": required}
+    return {"type": "object", "properties": props, "required": list(props)}

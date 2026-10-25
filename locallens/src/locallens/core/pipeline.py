@@ -172,8 +172,16 @@ def _add_value_filters(frame: QueryFrame, pre: Preprocessed, resolved: dict[str,
             frame.filters.append(Filter(column=col, op="=", value=val))
 
 
-def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_agg: str = "SUM") -> None:
-    """Rule-assisted overrides: where a keyword rule fires, it beats the model."""
+RULES_MODES = ("always", "fired", "off")
+
+
+def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_agg: str = "SUM",
+                 mode: str = "always") -> None:
+    """Rule-assisted overrides: where a keyword rule fires, it beats the model.
+
+    mode "always": the rules also decide intent and aggregation when no keyword fired (their fallbacks).
+    mode "fired":  without a keyword, the model's intent and aggregation stand (for a fine-tuned model).
+    """
     dates = reg.tagged("date")
     dim_cols = {c.flat_name for c in reg.tagged("dimension")}
     # a dimension phrase that is not just a filter value ("by city", not "corporate customers")
@@ -183,9 +191,10 @@ def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_ag
     h = infer(pre.text, has_dim, bool(dates), singular, default_agg)
     if h.order:
         frame.order = h.order
-    if h.intent:
+    if h.intent and not (mode == "fired" and h.intent_is_fallback):
         frame.intent = h.intent
-    frame.metric.agg = h.agg or frame.metric.agg
+    if not (mode == "fired" and h.agg_is_default and default_agg == "SUM"):   # a saved non-SUM default still applies
+        frame.metric.agg = h.agg or frame.metric.agg
     if h.agg_is_default and frame.intent == "proportion":
         frame.metric.agg = "SUM"          # a share of an average is not a share of anything
     # a limit must come from the question (a number or a singular superlative); the model's own guess is dropped
@@ -374,8 +383,10 @@ def _chart_only(res: Result, chart: str, reg: Registry, con: duckdb.DuckDBPyConn
 def ask(
     question: str, reg: Registry, con: duckdb.DuckDBPyConnection, slm: FrameFiller,
     session: Session | None = None, prefs: dict | None = None, followup: bool = False,
-    overrides: dict[str, str] | None = None, term_index=None,
+    overrides: dict[str, str] | None = None, term_index=None, rules_mode: str = "always",
 ) -> Result:
+    if rules_mode not in RULES_MODES:
+        raise ValueError(f"rules_mode must be one of {RULES_MODES}")
     session = session or Session()
     res = Result(question=question)
     t0 = time.perf_counter()
@@ -440,8 +451,8 @@ def ask(
         frame = _carry_over(frame, prev, pre, reg, resolved_values)
     _ground_filters(frame, pre.text, reg, prev)
     _ground_dimension(frame, pre, reg, prev)
-    if not followup:
-        _apply_rules(frame, pre, reg, (prefs or {}).get("default_agg") or "SUM")
+    if not followup and rules_mode != "off":
+        _apply_rules(frame, pre, reg, (prefs or {}).get("default_agg") or "SUM", rules_mode)
     _add_value_filters(frame, pre, resolved_values)
     _ground_metric(frame, pre, reg)
     frame.rules = _select_rules(pre.text, reg, prev)

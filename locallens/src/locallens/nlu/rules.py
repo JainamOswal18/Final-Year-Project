@@ -17,6 +17,7 @@ class RuleHints:
     top_n: int | None = None
     agg: str | None = None
     agg_is_default: bool = False   # no aggregation word in the question: the user's saved default was used
+    intent_is_fallback: bool = False   # no keyword decided the intent: it came from the last-resort branches
     order: str | None = None   # "asc" for lowest/bottom/worst questions
 
 
@@ -71,6 +72,8 @@ def infer(text: str, has_dimension_phrase: bool, has_date_column: bool, dimensio
         h.agg = "MAX"
     elif re.search(r"\b(?:minimum|min)\b", t):
         h.agg = "MIN"
+    elif re.search(r"\b(?:number|count) of (?:pieces|piece|pcs|units|unit|items|qty|quantity)\b", t):
+        h.agg = "SUM"        # "number of pieces sold" adds up quantity; it does not count rows
     elif re.search(r"\b(?:number of|count of)\b", t):
         h.agg = "COUNT"
     elif re.search(r"\b(?:total|sum|overall|altogether)\b", t):
@@ -91,8 +94,10 @@ def infer(text: str, has_dimension_phrase: bool, has_date_column: bool, dimensio
         has_dimension_phrase and re.search(r"\b(?:by|per|for each|each)\b", t)
     ):
         h.intent = "comparison"
-    elif re.search(r"\b(?:total|overall|how many|how much|sum|average|what was|what is)\b", t) or not has_dimension_phrase:
+    elif re.search(r"\b(?:total|overall|how many|how much|sum|average|what was|what is)\b", t):
         h.intent = "summary"
+    elif not has_dimension_phrase:
+        h.intent, h.intent_is_fallback = "summary", True
     else:
-        h.intent = "comparison"      # a dimension is named and nothing else decides: break the metric down by it
+        h.intent, h.intent_is_fallback = "comparison", True   # a dimension is named and nothing else decides
     return h

@@ -28,10 +28,10 @@ flowchart LR
 
 | Step | What happens | Code |
 |---|---|---|
-| 1 Prepare | fix typos, resolve "last quarter" / "December 2025" / fiscal years to dates, find column and value mentions, match unknown words by meaning | `nlu/preprocess.py`, `nlu/embeddings.py` |
+| 1 Prepare | fix typos, resolve "last quarter" / "December 2025" / fiscal years to dates, find column and value mentions, map common retail words to the dataset's columns ("outlet" → store, "town" → city, "pieces" → quantity; only when exactly one column fits), match unknown words by meaning | `nlu/preprocess.py`, `nlu/retail_terms.py`, `nlu/embeddings.py` |
 | gate | refuse chatter; ask when a word could mean two columns, or a "by <word>" is unexplained | `core/pipeline.py` |
 | 2 Model | Qwen2.5-0.5B (4-bit, CPU) fills the frame; its output is forced into a JSON schema whose column fields are lists of the real columns, so it cannot invent one | `nlu/slm.py`, `query/frame.py` |
-| 3 Rules | keywords set the question type, time grain, top-N and sort direction; anything the model made up (a filter, a grouping, a limit) is dropped unless the question says it | `nlu/rules.py`, `core/pipeline.py` |
+| 3 Rules | keywords set the question type, time grain, top-N and sort direction; anything the model made up (a filter, a grouping, a limit) is dropped unless the question says it. With `LOCALLENS_RULES=fired` the question type and aggregation are left to the model when no keyword fires (meant for a fine-tuned model; default `always`) | `nlu/rules.py`, `core/pipeline.py` |
 | 4 SQL | one template per question type; then parsed with sqlglot: a single SELECT, only the `flat` view, only known columns | `query/sqlgen.py`, `query/validator.py` |
 | 5 Run | DuckDB reads the stored Parquet files in place; the main table is joined to the others as one view called `flat` | `data/engine.py`, `data/ingest.py` |
 | 6 Chart | describe the result (types, time order, number of categories), then the first matching rule in `viz/charts_rules.yaml` picks the chart | `data/profiler.py`, `viz/charts.py` |

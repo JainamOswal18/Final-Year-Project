@@ -32,6 +32,8 @@ class Settings:
     login_max_failures: int = field(default_factory=lambda: int(_env("LOGIN_MAX_FAILURES", "5")))
     login_lock_minutes: float = field(default_factory=lambda: float(_env("LOGIN_LOCK_MINUTES", "5")))
     cache_datasets: int = field(default_factory=lambda: int(_env("CACHE_DATASETS", "8")))
+    # "always": rules also decide intent/aggregation when no keyword fires; "fired": the model decides then
+    rules_mode: str = field(default_factory=lambda: _env("RULES", "always"))
 
     @property
     def db_path(self) -> Path:

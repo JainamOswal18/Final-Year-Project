@@ -62,4 +62,12 @@ not matched, which is why the clarifying question matters more than the embeddin
 
 ```
 python eval/run_eval.py --set gold|heldout|heldout2|heldout3 [--show-failures] [--no-embeddings]
+                        [--rules always|fired|off] [--model path/to/other.gguf]
 ```
+
+* `--rules always` (default, same as the app): keyword rules decide the question type and aggregation, and their
+  fallbacks decide when no keyword fires. `fired`: the model decides when no keyword fires. `off`: no keyword rules
+  (grounding, dates and the SQL check still apply). Use these to see what the model contributes, e.g. base vs fine-tuned.
+* `--model` runs another GGUF file, such as a fine-tuned model, through the same questions.
+* The report also prints **model alone (before rules)**: how often the model's own frame had the right intent,
+  metric column and grouping. Failures show the model's raw frame next to the final one.
