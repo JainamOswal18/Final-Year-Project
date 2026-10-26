@@ -1,0 +1,76 @@
+model: default | rules: off
+matching by meaning: on
+
+30 questions
+  intent      43.3%  (13/30)
+  metric      80.0%  (24/30)
+  dimension   63.3%  (19/30)
+  time        76.7%  (23/30)
+  filters     80.0%  (24/30)
+  execution   40.0%  (12/30)
+  chart       43.3%  (13/30)
+  model alone (before rules): intent 50.0%, metric_column 100.0%, dimension 60.0%
+  asked a clarifying question instead of answering: 1 (counted as not answered above)
+  latency    p50 913 ms | p95 2209 ms | max 2576 ms
+
+Failures:
+ - takings by shop
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": null, "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - shop with the highest revenue
+     A ranking needs something to group by.
+ - units sold by town
+     got {"intent":"summary","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - sales for each outlet
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - top 3 shops by profit
+     A ranking needs something to group by.
+ - revenue by shop in 2024
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - number of pieces sold per category
+     got {"intent":"summary","metric":{"column":"quantity","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - earnings by month in 2024
+     got {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - how much did each town spend
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": null, "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - average profit margin per store
+     profit margin can't be split into shares. Try a comparison instead.
+ - list the top 4 sub categories by revenue in 2025
+     got {"intent":"distribution","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"sub_category","time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":4,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"sub_category","time":{"column":"order_date","grain":null,"start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":4,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "sub_category", "time": null, "filters": [], "top_n": 4, "ambiguous": []}
+ - orders per customer segment in 2024
+     order count is a calculated total, so it has no spread of values. Try a trend or a comparison.
+ - monthly average order value in 2023
+     asked: I wasn't sure which time you meant.
+ - yearly revenue by region
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":{"column":"order_date","grain":"year","start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - how many units in the Furniture category last quarter
+     A proportion needs something to group by.
+ - bottom 3 stores by sales
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_name", "time": null, "filters": [], "top_n": 3, "ambiguous": []}
+ - weekly sales in October 2025
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-10-01","end":"2025-10-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"week","start":"2025-10-01","end":"2025-10-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - which city has the highest average order value
+     got {"intent":"comparison","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "avg_order_value", "agg": "SUM"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}

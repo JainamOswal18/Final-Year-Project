@@ -1,0 +1,18 @@
+model: default | rules: always
+matching by meaning: on
+
+30 questions
+  intent      96.7%  (29/30)
+  metric      96.7%  (29/30)
+  dimension   96.7%  (29/30)
+  time        96.7%  (29/30)
+  filters     96.7%  (29/30)
+  execution   96.7%  (29/30)
+  chart       96.7%  (29/30)
+  model alone (before rules): intent 53.3%, metric_column 100.0%, dimension 60.0%
+  asked a clarifying question instead of answering: 1 (counted as not answered above)
+  latency    p50 1222 ms | p95 2827 ms | max 3895 ms
+
+Failures:
+ - monthly average order value in 2023
+     asked: I wasn't sure which time you meant.

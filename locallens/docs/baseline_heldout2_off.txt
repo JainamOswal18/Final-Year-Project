@@ -1,0 +1,78 @@
+model: default | rules: off
+matching by meaning: on
+
+40 questions
+  intent      50.0%  (20/40)
+  metric      70.0%  (28/40)
+  dimension   70.0%  (28/40)
+  time        72.5%  (29/40)
+  filters     72.5%  (29/40)
+  execution   47.5%  (19/40)
+  chart       50.0%  (20/40)
+  model alone (before rules): intent 57.5%, metric_column 100.0%, dimension 50.0%
+  asked a clarifying question instead of answering: 2 (counted as not answered above)
+  latency    p50 797 ms | p95 2020 ms | max 2922 ms
+
+Failures:
+ - Can you show me how sales developed over 2024?
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - Give me profit by quarter for last year
+     A comparison needs something to group by.
+ - I'd like to see the revenue curve for 2023
+     got {"intent":"distribution","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - units sold each month in Q1 2025
+     got {"intent":"distribution","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-03-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-03-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - yearly sales for corporate customers
+     A trend needs a date column.
+ - weekly profit in December 2025
+     A proportion needs something to group by.
+ - quarterly sales by category for 2025
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":"quarter","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - daily orders in November 2025
+     order count is a calculated total, so it has no spread of values. Try a trend or a comparison.
+ - profit margin by month in 2024
+     profit margin can't be split into shares. Try a comparison instead.
+ - monthly revnue 2024 by regon
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - profit for each store
+     got {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "profit", "agg": "SUM"}, "dimension": null, "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - average profit by category
+     got {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"AVG"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - profit margin per sub category
+     profit margin can't be split into shares. Try a comparison instead.
+ - sales in the West store region by category
+     asked: I wasn't sure which dimension you meant.
+ - Total quantity for each city in 2025
+     got {"intent":"summary","metric":{"column":"quantity","agg":"SUM"},"dimension":"cust_city","time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"quantity","agg":"SUM"},"dimension":"cust_city","time":{"column":"order_date","grain":null,"start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - show me the 3 least profitable categories
+     got {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [], "top_n": 3, "ambiguous": []}
+ - biggest product by revenue
+     got {"intent":"proportion","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"product_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"product_name","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "product_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - which store sold the most units
+     A proportion needs something to group by.
+ - what was the profit last quarter
+     A proportion needs something to group by.
+ - average profit margin for technology
+     profit margin can't be split into shares. Try a comparison instead.
+ - overall sales for large orders in 2025
+     asked: I wasn't sure which time you meant.

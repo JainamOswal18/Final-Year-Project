@@ -1,0 +1,19 @@
+model: default | rules: fired
+matching by meaning: on
+
+48 questions
+  intent     100.0%  (48/48)
+  metric      97.9%  (47/48)
+  dimension  100.0%  (48/48)
+  time        97.9%  (47/48)
+  filters    100.0%  (48/48)
+  execution   97.9%  (47/48)
+  chart      100.0%  (48/48)
+  model alone (before rules): intent 72.9%, metric_column 100.0%, dimension 68.8%
+  latency    p50 877 ms | p95 1819 ms | max 3205 ms
+
+Failures:
+ - Which city has the highest sales
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"MAX"},"dimension":"cust_city","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "MAX"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}

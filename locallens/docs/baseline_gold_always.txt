@@ -1,0 +1,15 @@
+model: default | rules: always
+matching by meaning: on
+
+48 questions
+  intent     100.0%  (48/48)
+  metric     100.0%  (48/48)
+  dimension  100.0%  (48/48)
+  time        97.9%  (47/48)
+  filters    100.0%  (48/48)
+  execution  100.0%  (48/48)
+  chart      100.0%  (48/48)
+  model alone (before rules): intent 72.9%, metric_column 100.0%, dimension 66.7%
+  latency    p50 860 ms | p95 1337 ms | max 2993 ms
+
+Failures:
