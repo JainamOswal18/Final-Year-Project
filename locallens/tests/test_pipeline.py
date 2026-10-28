@@ -211,3 +211,13 @@ def test_followup_applies_only_the_named_change_when_model_forgets_previous_fram
     assert [(f.column, f.value) for f in res.frame.filters] == [("category", "Technology")]
     res = pipeline.ask("and for 2025", reg, con, bare, s, followup=True)
     assert res.frame.time.start == "2025-01-01" and res.frame.filters[0].value == "Technology"
+
+
+def test_numeric_group_by_column_is_charted_as_a_category():
+    import pandas as pd
+    from locallens.core.pipeline import label_dimension
+    from locallens.query.frame import QueryFrame
+    f = QueryFrame.model_validate({"intent": "ranking", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Customer ID", "top_n": 3})
+    df = pd.DataFrame({"Customer ID": [12347.0, 12348.0], "revenue": [10.5, 7.0]})
+    out = label_dimension(df, f)
+    assert list(out["Customer ID"]) == ["12347", "12348"] and list(out["revenue"]) == [10.5, 7.0]

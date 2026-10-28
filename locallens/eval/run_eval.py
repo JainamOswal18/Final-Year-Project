@@ -40,7 +40,7 @@ from locallens.query.sqlgen import build_sql  # noqa: E402
 
 
 def gold_result(frame: QueryFrame, reg, con, sql: str | None = None) -> tuple[pd.DataFrame, str]:
-    df = engine.run(con, sql or build_sql(frame, reg))
+    df = pipeline.label_dimension(engine.run(con, sql or build_sql(frame, reg)), frame)
     return df, build_spec(df, frame.intent, profile(df)).type
 
 

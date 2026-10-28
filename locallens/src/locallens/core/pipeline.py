@@ -44,6 +44,18 @@ class Result:
     chart_forced: str | None = None      # the chart the user asked for in words, if any
 
 
+def label_dimension(df: pd.DataFrame, frame: QueryFrame) -> pd.DataFrame:
+    """A group-by column that happens to be numeric (a customer or store ID) is a label, not a quantity:
+    show it as text so the chart rules treat it as a category."""
+    d = frame.dimension
+    if d and d in df.columns and pd.api.types.is_numeric_dtype(df[d]):
+        df = df.copy()
+        col = df[d]
+        whole = col.dropna().map(float.is_integer).all() if pd.api.types.is_float_dtype(col) else True
+        df[d] = col.astype("Int64").astype(str) if whole else col.astype(str)
+    return df
+
+
 def data_today(con: duckdb.DuckDBPyConnection, reg: Registry) -> date:
     dates = reg.tagged("date")
     if not dates:
@@ -352,7 +364,7 @@ def _finish(res: Result, frame: QueryFrame, reg: Registry, con: duckdb.DuckDBPyC
         res.sql = sql
         res.timings_ms["sql"] = (time.perf_counter() - t2) * 1000
         t3 = time.perf_counter()
-        res.df = engine.run(con, sql)
+        res.df = label_dimension(engine.run(con, sql), frame)
         res.timings_ms["query"] = (time.perf_counter() - t3) * 1000
         if res.df.empty:
             res.error = "The query returned no rows. Try a different date range or filter."
