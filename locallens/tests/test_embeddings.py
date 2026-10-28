@@ -80,7 +80,7 @@ def test_the_match_reaches_the_answer(sreg, scon, index):
 @pytest.mark.skipif(not Path("models/bge-small-en-v1.5-q8_0.gguf").exists(), reason="embedding model not downloaded")
 def test_real_embedding_model_finds_synonyms_and_rejects_chatter(sreg):
     index = TermIndex(LlamaEmbedder("models/bge-small-en-v1.5-q8_0.gguf"), sreg)
-    assert preprocess("sales by boutique", sreg, TODAY, index).column_hints.get("boutique") == "store_name"
+    assert preprocess("sales by showroom", sreg, TODAY, index).column_hints.get("showroom") == "store_name"  # (retail glossary or meaning)
     assert preprocess("profit by area", sreg, TODAY, index).column_hints.get("area") == "store_region"
     for chatter in ("hi there", "hello", "thanks a lot", "what is the weather", "please give me bananas"):
         assert preprocess(chatter, sreg, TODAY, index).semantic == [], chatter
