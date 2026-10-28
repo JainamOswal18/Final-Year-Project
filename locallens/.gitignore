@@ -13,3 +13,5 @@ web/node_modules/
 web/dist/
 *.egg-info/
 finetune/external/
+finetune/runs/
+finetune/data/*.jsonl
