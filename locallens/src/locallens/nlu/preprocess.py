@@ -160,8 +160,22 @@ def _fiscal_mention(t: str, today: date, fiscal_start: int) -> DateHint | None:
     return None
 
 
+HINGLISH_DATES = [
+    (r"\bpich(?:h)?l[ei]\s+(?:quarter|timahi)\b", "last quarter"), (r"\bis+\s+(?:quarter|timahi)\b", "this quarter"),
+    (r"\bpich(?:h)?l[ae]\s+(?:mahin[ea]|month)\b", "last month"), (r"\bis+\s+mahin[ea]\b", "this month"),
+    (r"\bpich(?:h)?l[ae]\s+(?:saal|sal|varsh)\b", "last year"), (r"\bis+\s+(?:saal|sal|varsh)\b", "this year"),
+]
+
+
+def _english_dates(t: str) -> str:
+    """"pichle mahine" -> "last month": common Hinglish date words, so the resolver below needs only one vocabulary."""
+    for pat, eng in HINGLISH_DATES:
+        t = re.sub(pat, eng, t)
+    return t
+
+
 def resolve_dates(text: str, today: date, fiscal_start: int = 1) -> DateHint | None:
-    t = text.lower()
+    t = _english_dates(text.lower())
     fy_now = _fy_start_year(today, fiscal_start)
     q_now = ((today.month - fiscal_start) % 12) // 3 + 1
     hit = _fiscal_mention(t, today, fiscal_start)
