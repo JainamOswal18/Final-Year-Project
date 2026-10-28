@@ -1,0 +1,124 @@
+model: default | prompt: compact | rules: off
+matching by meaning: on
+
+51 cases: 51 answerable questions
+  intent       2.0%  (1/51)
+  metric       5.9%  (3/51)
+  dimension    5.9%  (3/51)
+  time         5.9%  (3/51)
+  filters      5.9%  (3/51)
+  execution    2.0%  (1/51)
+  chart        2.0%  (1/51)
+  model alone (before rules): intent 37.3%, metric_column 82.4%, dimension 58.8%
+  asked a clarifying question instead of answering: 41 (counted as not answered above)
+  latency    p50 696 ms | p95 1423 ms | max 1100 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       2.0% [0-10]        13.7% [7-26]
+  vocab                0.0% [0-49]        25.0% [5-70]       n=4
+
+Failures:
+ - total fresh spend
+     asked: I wasn't sure which dimension you meant.
+ - total milk spend
+     asked: I wasn't sure which metric you meant.
+ - total grocery spend
+     asked: I wasn't sure which time you meant.
+ - total frozen spend
+     Expected a number, got 'Frozen'
+ - total detergents and paper spend
+     asked: I wasn't sure which dimension you meant.
+ - total delicatessen spend
+     asked: I wasn't sure which dimension you meant.
+ - fresh spend by channel
+     asked: I wasn't sure which dimension you meant.
+ - milk spend by region
+     asked: I wasn't sure which metric you meant.
+ - grocery spend by channel
+     asked: I wasn't sure which time you meant.
+ - detergents and paper spend by channel
+     asked: I wasn't sure which dimension you meant.
+ - delicatessen spend by region
+     asked: I wasn't sure which dimension you meant.
+ - average fresh spend by channel
+     asked: I wasn't sure which dimension you meant.
+ - average grocery spend per region
+     asked: I wasn't sure which time you meant.
+ - total spend by channel
+     asked: I wasn't sure which dimension you meant.
+ - total spend by region
+     asked: I wasn't sure which dimension you meant.
+ - average milk spend for Retail customers by region
+     asked: I wasn't sure which metric you meant.
+ - fresh spend by region for Horeca customers
+     asked: I wasn't sure which dimension you meant.
+ - maximum frozen spend by channel
+     Expected a number, got 'MAX'
+ - minimum grocery spend by region
+     asked: I wasn't sure which time you meant.
+ - which region spends the most on milk
+     asked: I wasn't sure which metric you meant.
+ - which channel spends the most on grocery
+     asked: I wasn't sure which metric you meant.
+ - rank regions by total spend
+     asked: I wasn't sure which dimension you meant.
+ - rank channels by fresh spend
+     asked: I wasn't sure which dimension you meant.
+ - which region spends the least on frozen food
+     got {"intent":"distribution","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":["filters","filters"],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Frozen", "agg": "SUM"}, "dimension": "Region", "filters": [{"column": "Region", "op": "=", "value": "Other"}], "top_n": 1, "ambiguous": ["filters", "filters"]}
+ - share of fresh spend by region
+     asked: I wasn't sure which dimension you meant.
+ - share of grocery spend by channel
+     asked: I wasn't sure which dimension you meant.
+ - what percentage of milk spend comes from each region
+     asked: I wasn't sure which metric you meant.
+ - share of total spend by region
+     asked: I wasn't sure which dimension you meant.
+ - share of frozen spend by channel
+     got {"intent":"distribution","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":0,"order":"desc","ambiguous":["filters"],"rules":[]}
+     want {"intent":"proportion","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Frozen", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": 0, "ambiguous": ["filters"]}
+ - distribution of fresh spend
+     asked: I wasn't sure which dimension you meant.
+ - histogram of milk spend
+     asked: I wasn't sure which metric you meant.
+ - distribution of grocery spend for Retail customers
+     asked: I wasn't sure which dimension you meant.
+ - spread of frozen spend
+     Expected a number, got 'Frozen'
+ - total spend for Lisbon
+     asked: I wasn't sure which time you meant.
+ - fresh spend in Oporto
+     A trend needs a date column.
+ - grocery spend for Horeca customers
+     asked: I wasn't sure which dimension you meant.
+ - average fresh spend
+     asked: I wasn't sure which dimension you meant.
+ - average total spend
+     asked: I wasn't sure which time you meant.
+ - highest milk spend
+     asked: I wasn't sure which metric you meant.
+ - lowest delicatessen spend
+     asked: I wasn't sure which dimension you meant.
+ - frozen spend for Retail customers in Lisbon
+     A comparison needs something to group by.
+ - total detergents and paper spend in the Other region
+     asked: I wasn't sure which dimension you meant.
+ - dairy spend by area
+     asked: I wasn't sure which dimension you meant.
+ - cleaning spend by customer type
+     asked: I wasn't sure which dimension you meant.
+ - deli spend by region
+     asked: I wasn't sure which dimension you meant.
+ - top region for groceries
+     asked: I wasn't sure which dimension you meant.
+ - fresh spend for Lisbon by channel
+     A trend needs a date column.
+ - average frozen spend in Oporto
+     A trend needs a date column.
+ - rank regions by delicatessen spend
+     asked: I wasn't sure which dimension you meant.
+ - overall spend of Horeca customers
+     asked: I wasn't sure which dimension you meant.
