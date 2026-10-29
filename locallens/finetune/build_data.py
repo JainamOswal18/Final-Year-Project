@@ -46,13 +46,13 @@ def test_questions() -> set[str]:
     return qs
 
 
-def build(n_schemas: int, per_schema: int, seed: int, held_out: set[str], n_val: int = 16) -> tuple[list[dict], list[dict], dict]:
+def build(n_schemas: int, per_schema: int, seed: int, held_out: set[str], n_val: int = 16, wide_share: int = 3, compact_share: float = 0.5) -> tuple[list[dict], list[dict], dict]:
     rng = random.Random(seed)
     train, val = [], []
     seen: set[tuple] = set()
     dropped = Counter()
     for i in range(n_schemas):
-        sc = synth.make_schema(rng, i)
+        sc = synth.make_schema(rng, i, wide=(i % 10) < wide_share)
         gen = synth.Gen(sc, rng)
         verified = synth.verified_examples(gen, rng.choice([0, 0, 1, 2, 3]))
         from locallens.data.registry import Example
@@ -63,7 +63,7 @@ def build(n_schemas: int, per_schema: int, seed: int, held_out: set[str], n_val:
         while made < per_schema and tries < per_schema * 6:
             tries += 1
             kind = rng.choices([k for k, _ in MIX], [w for _, w in MIX])[0]
-            style = "full" if rng.random() < 0.5 else "compact"
+            style = "compact" if rng.random() < compact_share else "full"
             meta = {"schema": i, "kind": kind}
             if kind == "followup":
                 base_kind = rng.choice(["comparison", "summary", "trend", "ranking", "proportion"])
@@ -165,19 +165,23 @@ def main() -> None:
     ap.add_argument("--per-schema", type=int, default=80)
     ap.add_argument("--val-schemas", type=int, default=16)
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--wide-share", type=int, default=3, help="out of every 10 schemas, how many are wide (product-group columns plus a generic total)")
+    ap.add_argument("--compact-share", type=float, default=0.5, help="share of examples with the compact prompt")
+    ap.add_argument("--out", type=Path, help="write the files here instead of finetune/data")
     ap.add_argument("--token-limit", type=int, default=2048 - 320)
     args = ap.parse_args()
     held = test_questions()
-    train, val, dropped = build(args.schemas, args.per_schema, args.seed, held, args.val_schemas)
+    train, val, dropped = build(args.schemas, args.per_schema, args.seed, held, args.val_schemas, args.wide_share, args.compact_share)
     held_list = sorted(held)
     train, near_t = drop_near_test(train, held_list)
     val, near_v = drop_near_test(val, held_list)
     dropped["nearly the same as a test question"] = near_t + near_v
     train, td = token_filter(train, args.token_limit)
     val, vd = token_filter(val, args.token_limit)
-    OUT.mkdir(parents=True, exist_ok=True)
+    out = args.out or OUT
+    out.mkdir(parents=True, exist_ok=True)
     for name, rows in (("train", train), ("val", val)):
-        (OUT / f"{name}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+        (out / f"{name}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
     stats = {
         "seed": args.seed, "schemas": args.schemas, "train": len(train), "val": len(val),
         "dropped": {**dropped, "over the token limit": td + vd},
@@ -186,7 +190,7 @@ def main() -> None:
         "followups_with_previous_frame": sum("Previous frame" in r["messages"][-2]["content"] for r in train),
         "leakage_vs_heldout4": leakage(train), "sources": SOURCES,
     }
-    (OUT / "stats.json").write_text(json.dumps(stats, indent=2))
+    (out / "stats.json").write_text(json.dumps(stats, indent=2))
     print(json.dumps(stats, indent=2))
 
 

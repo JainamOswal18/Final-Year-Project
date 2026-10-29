@@ -59,3 +59,25 @@ def test_followup_prompts_carry_the_previous_frame():
     train, _, _ = small()
     fu = [e for e in train if e["meta"]["kind"] == "followup"]
     assert fu and all("Previous frame: " in e["messages"][-2]["content"] for e in fu)
+
+
+def test_wide_schemas_teach_the_specific_metric_over_the_generic_word():
+    rng = random.Random(11)
+    sc = synth.make_schema(rng, 0, wide=True)
+    gen = synth.Gen(sc, rng)
+    both = alone = 0
+    for _ in range(300):
+        q, info = gen.make(rng.choice(["summary", "comparison", "ranking"]))
+        pre = synth.preprocess(q, sc.reg, sc.today)
+        hinted = set(pre.column_hints.values())
+        if info["m"] in sc.group_cols and sc.total in hinted:
+            both += 1                                   # "bakery sales": two hints, the group column is the answer
+        if info["m"] == sc.total and not (set(sc.group_cols) & hinted):
+            alone += 1                                  # "total sales": the generic total is the answer
+    assert both > 20 and alone > 20
+
+
+def test_training_vocabulary_stays_apart_from_the_wholesale_test():
+    banned = {"fresh", "milk", "grocery", "frozen", "dairy", "deli", "delicatessen", "cleaning", "detergents", "spend"}
+    names = set(synth.GROUP_COLUMNS) | set(synth.GENERIC_WORDS)
+    assert not names & banned and "spend" not in " ".join(synth.GENERIC_WORDS)

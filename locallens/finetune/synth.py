@@ -79,6 +79,13 @@ DATES = [("order_date", ["order date", "date"]), ("txn_date", ["transaction date
          ("bill_date", ["bill date", "date"]), ("sale_date", ["sale date", "date"]), ("date", ["date"]), ("Order Date", ["order date", "date"]),
          ("order_dt", ["order date", "date"]), ("purchase_date", ["purchase date", "date"])]
 SECOND_DATES = [("ship_date", ["ship date", "shipping date"]), ("delivery_date", ["delivery date"]), ("return_date", ["return date"])]
+# "Wide" schemas: the money is split over product-group columns and a generic total measure, as in a wholesaler's spend table.
+# A question like "bakery sales by region" then carries TWO metric hints (bakery -> the column, sales -> the total measure).
+# The specific one is the answer; the generic word alone ("total sales") means the total measure.
+# Kept apart from the evaluation dataset on purpose: no fresh/milk/grocery/frozen/dairy/deli/cleaning, and no "spend".
+GROUP_COLUMNS = ["produce", "bakery", "snacks", "beverages", "staples", "toiletries", "pet_food", "stationery", "toys", "apparel", "footwear",
+                 "cosmetics", "electronics", "hardware", "garden", "sweets", "spices", "pulses", "kitchenware", "books"]
+GENERIC_WORDS = ["sales", "revenue", "value", "billing", "amount", "turnover"]
 DESCRIPTIONS = [
     "Retail sales for a multi-store chain, one row per order line.", "Point-of-sale transactions from our stores and online shop.",
     "Order lines of an Indian retail business. Amounts are in rupees.", "Sales transactions, one row per bill line. Amounts in INR.",
@@ -97,6 +104,10 @@ class Schema:
     date2: str = ""
     measures: dict = field(default_factory=dict)     # concept -> measure name
     examples: list = field(default_factory=list)
+    wide: bool = False
+    generic: str = ""                                  # the generic word of a wide schema ("sales")
+    group_cols: list = field(default_factory=list)     # its product-group metric columns
+    total: str = ""                                    # its generic total measure
 
 
 def _styled(name: str, style: str, rng: random.Random) -> str:
@@ -107,7 +118,7 @@ def _styled(name: str, style: str, rng: random.Random) -> str:
     return name
 
 
-def make_schema(rng: random.Random, idx: int) -> Schema:
+def make_schema(rng: random.Random, idx: int, wide: bool = False) -> Schema:
     style = rng.choice(STYLES)
     reg = Registry(name=f"synthetic_{idx}", description=rng.choice(DESCRIPTIONS), main_table=TABLE,
                    fiscal_start_month=4 if rng.random() < 0.85 else 1)
@@ -134,7 +145,26 @@ def make_schema(rng: random.Random, idx: int) -> Schema:
         sc.concept[concept] = name
         return name
 
-    metric_concepts = ["sales"] + [c for c, p in [("profit", .85), ("quantity", .85), ("discount", .3), ("price", .3)] if rng.random() < p]
+    if wide:
+        sc.wide, sc.generic = True, rng.choice(GENERIC_WORDS)
+        bare = rng.random() < 0.7                      # bare names ("produce") are what makes the double hint
+        for i, g in enumerate(rng.sample(GROUP_COLUMNS, k=rng.randint(4, 6))):
+            name = g if bare else f"{g}_{rng.choice(['amt', 'sales', 'value'])}"
+            name = _styled(name, style, rng) if style == "title" else name
+            used.add(name.lower())
+            reg.columns.append(Column(table=TABLE, name=name, flat_name=name, tag="metric", synonyms=[g.replace("_", " ")] if not bare or rng.random() < 0.5 else []))
+            sc.concept[f"group{i}"] = name
+            sc.group_cols.append(name)
+            sc.metrics.append(name)
+        sc.concept["sales"] = sc.group_cols[0]          # code paths that want "the" sales column get one
+        sc.total = f"total_{sc.generic}"
+        expr = " + ".join(f'"{c}"' for c in sc.group_cols)
+        reg.measures.append(Measure(name=sc.total, label=f"total {sc.generic}", additive=True, expression=f"SUM({expr})",
+                                    synonyms=[sc.generic, f"overall {sc.generic}"], description="All product groups added up"))
+        sc.measures["total"] = sc.total
+        metric_concepts = []
+    else:
+        metric_concepts = ["sales"] + [c for c, p in [("profit", .85), ("quantity", .85), ("discount", .3), ("price", .3)] if rng.random() < p]
     for c in metric_concepts:
         n = add(c, METRICS[c], "metric")
         if n:
@@ -164,7 +194,7 @@ def make_schema(rng: random.Random, idx: int) -> Schema:
         reg.columns.append(Column(table=TABLE, name=n2, flat_name=n2, tag="date", synonyms=list(s2)))
         sc.date2 = n2
     # business measures
-    if "profit" in sc.concept and rng.random() < 0.6:
+    if "profit" in sc.concept and not wide and rng.random() < 0.6:
         reg.measures.append(Measure(name="profit_margin", label="profit margin", format="percent", synonyms=["margin percent"],
                                     expression=f'SUM("{sc.concept["profit"]}") / NULLIF(SUM("{sc.concept["sales"]}"), 0)', description="Profit as a share of sales"))
         sc.measures["margin"] = "profit_margin"
@@ -172,11 +202,11 @@ def make_schema(rng: random.Random, idx: int) -> Schema:
         reg.measures.append(Measure(name="order_count", label="order count", additive=True, synonyms=["orders", "number of orders"],
                                     expression="COUNT(DISTINCT order_id)", description="Number of distinct orders"))
         sc.measures["orders"] = "order_count"
-    if rng.random() < 0.4:
+    if rng.random() < 0.4 and not wide:
         reg.measures.append(Measure(name="avg_order_value", label="average order value", format="currency", synonyms=["aov", "basket value"],
                                     expression=f'SUM("{sc.concept["sales"]}") / NULLIF(COUNT(DISTINCT order_id), 0)', description="Sales per order"))
         sc.measures["aov"] = "avg_order_value"
-    sc.metrics += [m.name for m in reg.measures]
+    sc.metrics += [m.name for m in reg.measures if m.name not in sc.metrics]
     rng.shuffle(reg.columns)
     return sc
 
@@ -313,7 +343,15 @@ class Gen:
         raise ValueError(kind)
 
     def _mp(self, m: str, agg_word: str) -> str:
-        p = phrase(self.sc, m, self.rng)
+        sc, rng = self.sc, self.rng
+        if sc.wide and m in sc.group_cols:
+            p = phrase(sc, m, rng)
+            if not any(w in p.split() for w in GENERIC_WORDS) and rng.random() < 0.75:
+                p = f"{p} {sc.generic}"                 # "bakery sales": two metric hints, the specific one is meant
+        elif sc.wide and m == sc.total:
+            p = rng.choice([sc.generic, f"total {sc.generic}", f"overall {sc.generic}", f"{sc.generic} overall"])
+        else:
+            p = phrase(sc, m, rng)
         return f"{agg_word} {p}".strip()
 
     def trend(self):

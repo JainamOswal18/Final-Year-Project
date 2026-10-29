@@ -1,0 +1,15 @@
+model: models/finetuned/locallens-r2-q8_0.gguf | prompt: compact | rules: always
+matching by meaning: on
+
+40 cases: 40 answerable questions
+  intent      95.0%  (38/40)
+  metric     100.0%  (40/40)
+  dimension  100.0%  (40/40)
+  time       100.0%  (40/40)
+  filters    100.0%  (40/40)
+  execution  100.0%  (40/40)
+  chart       97.5%  (39/40)
+  model alone (before rules): intent 90.0%, metric_column 100.0%, dimension 100.0%
+  latency    p50 829 ms | p95 1473 ms | max 1670 ms
+
+Failures:

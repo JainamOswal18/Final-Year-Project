@@ -108,8 +108,28 @@ def _ground_filters(frame: QueryFrame, text: str, reg: Registry, prev: QueryFram
             if not all(v.lower() in real for v in vals):
                 continue
             f.value = ",".join(real[v.lower()] for v in vals)
+        elif col and f.op in ("=", "!=", "in") and col.samples and all(_is_number(s) for s in col.samples) \
+                and not all(_is_number(v) for v in vals):
+            continue                                   # a numeric ID column "equal to" a word: the model guessed the column
         kept.append(f)
     frame.filters = kept
+
+
+def _is_number(s: str) -> bool:
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def _ground_ambiguous(frame: QueryFrame, pre: Preprocessed, reg: Registry) -> None:
+    """A field the question names outright is not ambiguous, whatever the model says: "compare sales by category"
+    names its metric, its grouping and nothing is unclear. Only fields the question leaves open stay flagged."""
+    hinted = set(pre.column_hints.values())
+    named = {"metric": set(reg.metric_names()), "dimension": {c.flat_name for c in reg.tagged("dimension")}}
+    frame.ambiguous = [f for f in frame.ambiguous
+                       if not ((f in named and hinted & named[f]) or (f == "time" and pre.date_hint))]
 
 
 def _value_beside_column(text: str, value: str, phrases: list[str]) -> bool:
@@ -374,6 +394,9 @@ def _finish(res: Result, frame: QueryFrame, reg: Registry, con: duckdb.DuckDBPyC
     except FrameError as e:
         res.error = str(e)
         return res
+    except duckdb.Error as e:
+        res.error = f"The data could not answer that as asked ({str(e).splitlines()[0][:160]}). Try rephrasing it."
+        return res
     res.timings_ms["total"] = (time.perf_counter() - t0) * 1000
     session.last_frame = frame
     session.pending = None
@@ -463,6 +486,7 @@ def ask(
         frame = _carry_over(frame, prev, pre, reg, resolved_values)
     _ground_filters(frame, pre.text, reg, prev)
     _ground_dimension(frame, pre, reg, prev)
+    _ground_ambiguous(frame, pre, reg)
     if not followup and rules_mode != "off":
         _apply_rules(frame, pre, reg, (prefs or {}).get("default_agg") or "SUM", rules_mode)
     _add_value_filters(frame, pre, resolved_values)

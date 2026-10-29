@@ -60,7 +60,7 @@ def test_ambiguous_term_asks_instead_of_guessing(reg, con):
 
 def test_model_flagged_ambiguity_becomes_clarification(reg, con):
     slm = FakeSLM({"intent": "summary", "metric": M, "ambiguous": ["metric"]})
-    res = pipeline.ask("show sales", reg, con, slm)
+    res = pipeline.ask("break it down by category", reg, con, slm)
     assert res.clarification and res.clarification.field == "metric"
     assert "sales_amt" in res.clarification.options
 
@@ -221,3 +221,27 @@ def test_numeric_group_by_column_is_charted_as_a_category():
     df = pd.DataFrame({"Customer ID": [12347.0, 12348.0], "revenue": [10.5, 7.0]})
     out = label_dimension(df, f)
     assert list(out["Customer ID"]) == ["12347", "12348"] and list(out["revenue"]) == [10.5, 7.0]
+
+
+def test_a_field_the_question_names_is_not_ambiguous(reg, con):
+    slm = FakeSLM({"intent": "comparison", "metric": M, "dimension": "category", "ambiguous": ["metric", "dimension"]})
+    res = pipeline.ask("compare sales by category", reg, con, slm)
+    assert res.clarification is None and res.error == "" and res.frame.ambiguous == []
+
+
+def test_a_word_filter_on_a_numeric_id_column_is_dropped(reg, con):
+    from locallens.data.registry import Column
+    reg.columns.append(Column(table="orders", name="cust_id", flat_name="cust_id", tag="dimension", samples=["1001.0", "1002.0"]))
+    try:
+        slm = FakeSLM({"intent": "summary", "metric": M, "filters": [{"column": "cust_id", "op": "=", "value": "Mumbai"}]})
+        res = pipeline.ask("total sales in Mumbai", reg, con, slm)
+    finally:
+        reg.columns.pop()
+    assert all(f.column != "cust_id" for f in res.frame.filters)
+
+
+def test_a_database_error_is_reported_not_raised(reg, con, monkeypatch):
+    import duckdb
+    monkeypatch.setattr(pipeline.engine, "run", lambda *a, **k: (_ for _ in ()).throw(duckdb.ConversionException("Conversion Error: bad value")))
+    res = pipeline.ask("total sales", reg, con, FakeSLM({"intent": "summary", "metric": M}))
+    assert "could not answer" in res.error and res.df is None

@@ -1,0 +1,39 @@
+model: models/finetuned/locallens-r2-q8_0.gguf | prompt: compact | rules: always
+matching by meaning: on
+
+51 cases: 51 answerable questions
+  intent      92.2%  (47/51)
+  metric      88.2%  (45/51)
+  dimension   92.2%  (47/51)
+  time        92.2%  (47/51)
+  filters     92.2%  (47/51)
+  execution   86.3%  (44/51)
+  chart       92.2%  (47/51)
+  model alone (before rules): intent 100.0%, metric_column 94.1%, dimension 98.0%
+  latency    p50 545 ms | p95 777 ms | max 791 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       86.3% [74-93]      94.1% [84-98]
+  vocab                75.0% [30-95]      100.0% [51-100]    n=4
+
+Failures:
+ - total detergents and paper spend
+     Expected a number, got 'detergents'
+ - detergents and paper spend by channel
+     Expected a number, got 'detergents'
+ - which region spends the least on frozen food
+     got {"intent":"ranking","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"asc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Frozen", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": 1, "ambiguous": []}
+ - highest milk spend
+     A ranking needs something to group by.
+ - lowest delicatessen spend
+     A ranking needs something to group by.
+ - total detergents and paper spend in the Other region
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"Region","op":"=","value":"Other"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"Detergents_Paper","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"Region","op":"=","value":"Other"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": "Region", "filters": [{"column": "Channel", "op": "=", "value": "Other"}], "top_n": null, "ambiguous": []}
+ - top region for groceries
+     got {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Grocery", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
