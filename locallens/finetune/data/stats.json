@@ -1,0 +1,56 @@
+{
+  "seed": 7,
+  "schemas": 110,
+  "train": 7612,
+  "val": 1104,
+  "dropped": {
+    "ranking no date": 16,
+    "comparison no date": 25,
+    "comparison unresolved": 14,
+    "trend no date": 50,
+    "summary no date": 36,
+    "same as a test question": 48,
+    "summary unresolved": 6,
+    "proportion no date": 8,
+    "trend unresolved": 3,
+    "duplicate": 14,
+    "ranking unresolved": 16,
+    "distribution unresolved": 1,
+    "followup base unresolved": 9,
+    "distribution no date": 5,
+    "proportion unresolved": 2,
+    "hinglish unresolved": 2,
+    "nearly the same as a test question": 84,
+    "over the token limit": 0
+  },
+  "kinds": {
+    "ranking": 1132,
+    "comparison": 1562,
+    "distribution": 356,
+    "followup": 827,
+    "trend": 1143,
+    "summary": 1310,
+    "hinglish": 526,
+    "proportion": 505,
+    "ambiguous": 251
+  },
+  "styles": {
+    "full": 3844,
+    "compact": 3768
+  },
+  "tokens": {
+    "median": 974,
+    "max": 1562
+  },
+  "followups_with_previous_frame": 827,
+  "leakage_vs_heldout4": {
+    "heldout4_questions": 204,
+    "median_closest_training_question": 74.0,
+    "share_ge_90": 0.0,
+    "share_ge_95": 0.0,
+    "max": 89.5
+  },
+  "sources": {
+    "synthetic": "our own templates and vocabulary (finetune/synth.py)"
+  }
+}

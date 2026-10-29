@@ -1,0 +1,463 @@
+model: default | prompt: compact | rules: fired
+matching by meaning: on
+
+233 cases: 192 answerable questions, 12 that should be refused or asked about, 29 multi-turn conversations
+  intent       9.9%  (19/192)
+  metric       9.9%  (19/192)
+  dimension    9.4%  (18/192)
+  time         9.9%  (19/192)
+  filters      9.9%  (19/192)
+  execution    9.4%  (18/192)
+  chart        9.4%  (18/192)
+  model alone (before rules): intent 42.2%, metric_column 90.6%, dimension 51.6%
+  asked a clarifying question instead of answering: 168 (counted as not answered above)
+  should-ask handled correctly: 100.0% [76-100]  |  over-asking: 168/192  |  under-asking: 0/12
+  latency    p50 903 ms | p95 1951 ms | max 2060 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       9.4% [6-14]        14.1% [10-20]
+  agg                  4.8% [1-23]        5.3% [1-25]        n=21
+  followup             10.3% [4-26]       -                  n=29
+  hinglish             5.3% [1-25]        5.6% [1-26]        n=19
+  indian_fy            47.4% [27-68]      6.7% [1-30]        n=19
+  intent_no_keyword    0.0% [-0-14]       8.7% [2-27]        n=23
+  multi_table          10.9% [7-17]       21.4% [15-29]      n=129
+  typo                 8.3% [1-35]        16.7% [5-45]       n=12
+  vocab                8.7% [2-27]        4.5% [1-22]        n=23
+  multi-turn (final)   10.3% [4-26]  n=29
+
+Failures:
+ - How did monthly sales look through 2023?
+     asked: I wasn't sure which time you meant.
+ - sales per month in 2025
+     asked: I wasn't sure which time you meant.
+ - revenue month by month since the start of 2024
+     asked: I wasn't sure which time you meant.
+ - profit by month for the last 6 months
+     asked: I wasn't sure which time you meant.
+ - quarterly turnover for 2023
+     asked: I wasn't sure which time you meant.
+ - how many units moved each week in November 2025
+     asked: I wasn't sure which time you meant.
+ - daily orders during the last week of December 2025
+     asked: I wasn't sure which time you meant.
+ - profit trend for Technology in 2025
+     asked: I wasn't sure which time you meant.
+ - show sales growth by year
+     asked: I wasn't sure which time you meant.
+ - how has profit moved from quarter to quarter
+     asked: I wasn't sure which time you meant.
+ - sales for each month of 2024 split by category
+     asked: I wasn't sure which time you meant.
+ - monthly profit for each customer segment in 2025
+     asked: I wasn't sure which time you meant.
+ - monthly GMV in 2024
+     asked: I wasn't sure which time you meant.
+ - weekly sales in Mumbai in October 2025
+     asked: I wasn't sure which metric you meant.
+ - how are sales doing over time
+     asked: I wasn't sure which time you meant.
+ - monthly units by region for 2025
+     asked: I wasn't sure which time you meant.
+ - average order value by quarter in 2024
+     asked: I wasn't sure which time you meant.
+ - average monthly sales in 2025
+     asked: I wasn't sure which time you meant.
+ - profit margin each month of 2024
+     asked: I wasn't sure which metric you meant.
+ - sales trend for Furniture and Technology in 2023
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[{"column":"category","op":"in","value":"Furniture,Technology"}],"top_n":null,"order":"desc","ambiguous":["filters"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[{"column":"category","op":"in","value":"Furniture,Technology"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [{"column": "category", "op": "in", "value": "Furniture, Technology"}, {"column": "store_region", "op": "in", "value": "North"}], "top_n": null, "ambiguous": ["filters"]}
+ - year on year profit
+     asked: I wasn't sure which time you meant.
+ - daily sales in the first week of January 2025
+     asked: I wasn't sure which time you meant.
+ - monthly revnue for 2024
+     asked: I wasn't sure which time you meant.
+ - quartrly profit in 2025
+     asked: I wasn't sure which time you meant.
+ - monthly sales by sub catagory in 2024
+     asked: I wasn't sure which time you meant.
+ - sales by month in Q3 FY25
+     asked: I wasn't sure which time you meant.
+ - weekly units sold in Q2 FY26
+     asked: I wasn't sure which time you meant.
+ - monthly revenue for financial year 2024-25 by category
+     asked: I wasn't sure which time you meant.
+ - month wise sales 2024 dikhao
+     asked: I wasn't sure which dimension you meant.
+ - pichle saal ka monthly profit
+     asked: I wasn't sure which time you meant.
+ - is saal mahine ke hisab se sales
+     asked: I wasn't sure which metric you meant.
+ - sales by store region in 2024
+     asked: I wasn't sure which time you meant.
+ - revenue split by customer segment for 2025
+     asked: I wasn't sure which time you meant.
+ - how do Mumbai and Delhi compare on sales
+     asked: I wasn't sure which metric you meant.
+ - units sold by category
+     asked: I wasn't sure which time you meant.
+ - profit for every sub category
+     asked: I wasn't sure which dimension you meant.
+ - average profit per store
+     asked: I wasn't sure which time you meant.
+ - average quantity by sub category
+     asked: I wasn't sure which dimension you meant.
+ - largest single order by city
+     asked: I wasn't sure which time you meant.
+ - smallest order value in each category
+     asked: I wasn't sure which dimension you meant.
+ - sales by outlet
+     asked: I wasn't sure which time you meant.
+ - revenue across towns
+     asked: I wasn't sure which time you meant.
+ - profit per zone
+     asked: I wasn't sure which time you meant.
+ - GMV by customer segment
+     asked: I wasn't sure which dimension you meant.
+ - sales of each department
+     asked: I wasn't sure which dimension you meant.
+ - number of orders by city
+     asked: I wasn't sure which dimension you meant.
+ - orders per store in 2025
+     asked: I wasn't sure which time you meant.
+ - average order value by city
+     asked: I wasn't sure which time you meant.
+ - profit margin by category
+     asked: I wasn't sure which metric you meant.
+ - sales by order size
+     asked: I wasn't sure which dimension you meant.
+ - sales by category for Consumer customers
+     asked: I wasn't sure which time you meant.
+ - profit by city for Technology products in 2024
+     asked: I wasn't sure which metric you meant.
+ - sales by store region for corporate customers
+     asked: I wasn't sure which time you meant.
+ - compare quantity across customer regions in 2025
+     asked: I wasn't sure which dimension you meant.
+ - high value sales by category
+     asked: I wasn't sure which time you meant.
+ - sales by region last month
+     asked: I wasn't sure which time you meant.
+ - profit by category in Q3 2024
+     asked: I wasn't sure which dimension you meant.
+ - proft by store
+     asked: I wasn't sure which time you meant.
+ - quantiy by sub category
+     asked: I wasn't sure which time you meant.
+ - sales by region in FY25
+     Could not interpret the question: 1 validation error for QueryFrame
+  Invalid JSON: EOF while parsing a string at line 1 column 373 [type=json_invalid, input_value='{"intent": "comparison",...00000000000000000000000', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
+ - region wise sales
+     asked: I wasn't sure which time you meant.
+ - city wise profit dikhao
+     asked: I wasn't sure which dimension you meant.
+ - outlet wise GMV 2024 mein
+     asked: I wasn't sure which time you meant.
+ - category ke hisab se quantity
+     asked: I wasn't sure which dimension you meant.
+ - segment wise average order value
+     asked: I wasn't sure which time you meant.
+ - top 5 cities by sales
+     asked: I wasn't sure which time you meant.
+ - best 3 stores for profit in 2025
+     asked: I wasn't sure which time you meant.
+ - which product made the most profit
+     asked: I wasn't sure which metric you meant.
+ - which sub category sells the most units
+     asked: I wasn't sure which time you meant.
+ - lowest 3 cities by revenue
+     asked: I wasn't sure which time you meant.
+ - which region has the least profit
+     asked: I wasn't sure which metric you meant.
+ - rank stores by sales
+     asked: I wasn't sure which time you meant.
+ - top 10 products by units in 2024
+     asked: I wasn't sure which time you meant.
+ - top 3 sub categories by sales for Technology
+     asked: I wasn't sure which time you meant.
+ - which city had the highest sales last quarter
+     asked: I wasn't sure which time you meant.
+ - biggest 5 products by revenue in Mumbai
+     asked: I wasn't sure which metric you meant.
+ - stores ordered by profit
+     asked: I wasn't sure which time you meant.
+ - which outlet brings in the most money
+     asked: I wasn't sure which metric you meant.
+ - top 5 towns by GMV
+     asked: I wasn't sure which time you meant.
+ - top 3 zones by pieces sold
+     asked: I wasn't sure which time you meant.
+ - which store has the highest average order value
+     asked: I wasn't sure which time you meant.
+ - top 5 cities by average profit
+     asked: I wasn't sure which metric you meant.
+ - which category has the biggest single order
+     asked: I wasn't sure which time you meant.
+ - top 5 stores by number of orders
+     asked: I wasn't sure which time you meant.
+ - top 3 stores by profit margin
+     asked: I wasn't sure which time you meant.
+ - top 3 cities by revenue in Q4 2024
+     asked: I wasn't sure which time you meant.
+ - top 5 prodcts by sales
+     asked: I wasn't sure which time you meant.
+ - best performing stors by profit
+     asked: I wasn't sure which time you meant.
+ - which store had the most profit in Q2 FY26
+     asked: I wasn't sure which time you meant.
+ - sabse zyada sales wali city
+     asked: I wasn't sure which time you meant.
+ - sabse kam profit wala store
+     asked: I wasn't sure which time you meant.
+ - share of profit by category
+     asked: I wasn't sure which dimension you meant.
+ - what percent of sales comes from each region
+     asked: I wasn't sure which dimension you meant.
+ - proportion of units sold by sub category
+     asked: I wasn't sure which dimension you meant.
+ - how is revenue divided between customer segments
+     asked: I wasn't sure which dimension you meant.
+ - breakdown of orders by city
+     asked: I wasn't sure which dimension you meant.
+ - each category's slice of sales in 2025
+     asked: I wasn't sure which dimension you meant.
+ - what share of profit does each store contribute
+     asked: I wasn't sure which metric you meant.
+ - percentage of sales by order size
+     asked: I wasn't sure which dimension you meant.
+ - share of sales by category for Delhi
+     asked: I wasn't sure which dimension you meant.
+ - share of revenue by zone
+     asked: I wasn't sure which time you meant.
+ - share of GMV by outlet in 2024
+     asked: I wasn't sure which time you meant.
+ - share of profit by catagory
+     asked: I wasn't sure which dimension you meant.
+ - region ka sales share
+     asked: I wasn't sure which time you meant.
+ - share of total sales in Q3 FY25 by category
+     Could not interpret the question: 1 validation error for QueryFrame
+  Invalid JSON: EOF while parsing a string at line 1 column 369 [type=json_invalid, input_value='{"intent": "summary", "m...00000000000000000000000', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
+ - distribution of sales per order
+     asked: I wasn't sure which dimension you meant.
+ - histogram of quantity
+     asked: I wasn't sure which time you meant.
+ - how are order values spread in 2025
+     asked: I wasn't sure which time you meant.
+ - distribution of profit in Mumbai
+     asked: I wasn't sure which metric you meant.
+ - show the distribution of units per order for Technology
+     asked: I wasn't sure which dimension you meant.
+ - histogram of order value for Consumer customers in 2024
+     asked: I wasn't sure which time you meant.
+ - distribution of GMV
+     asked: I wasn't sure which time you meant.
+ - spread of pieces sold per order
+     asked: I wasn't sure which dimension you meant.
+ - distrbution of profit
+     asked: I wasn't sure which metric you meant.
+ - order value ka distribution
+     asked: I wasn't sure which dimension you meant.
+ - total sales in 2025
+     asked: I wasn't sure which time you meant.
+ - how much profit did we make in 2024
+     asked: I wasn't sure which time you meant.
+ - what were total units sold last quarter
+     asked: I wasn't sure which time you meant.
+ - number of orders last month
+     asked: I wasn't sure which time you meant.
+ - sales this year
+     asked: I wasn't sure which time you meant.
+ - average order value in 2025
+     asked: I wasn't sure which time you meant.
+ - average sales per order
+     asked: I wasn't sure which time you meant.
+ - average profit
+     asked: I wasn't sure which time you meant.
+ - average quantity per order for Technology
+     asked: I wasn't sure which dimension you meant.
+ - biggest order value ever
+     asked: I wasn't sure which dimension you meant.
+ - smallest profit on a single order
+     asked: I wasn't sure which metric you meant.
+ - largest quantity in one order in 2024
+     asked: I wasn't sure which time you meant.
+ - how many orders did we get
+     asked: I wasn't sure which dimension you meant.
+ - how many orders in Pune
+     asked: I wasn't sure which time you meant.
+ - profit margin in Q2 2025
+     asked: I wasn't sure which time you meant.
+ - sales in Chennai during 2024
+     asked: I wasn't sure which time you meant.
+ - profit from Corporate customers in 2025
+     asked: I wasn't sure which dimension you meant.
+ - units sold in the Furniture category in 2023
+     A proportion needs something to group by.
+ - sales of Phones
+     asked: I wasn't sure which time you meant.
+ - how much did the Delhi Store sell in 2025
+     asked: I wasn't sure which time you meant.
+ - sales to Home Office customers in the East region
+     asked: I wasn't sure which time you meant.
+ - total high value sales
+     asked: I wasn't sure which time you meant.
+ - total sales for orders with quantity above 5
+     asked: I wasn't sure which dimension you meant.
+ - profit on orders under 100 units
+     asked: I wasn't sure which time you meant.
+ - total GMV
+     asked: I wasn't sure which time you meant.
+ - pieces sold in 2025
+     asked: I wasn't sure which time you meant.
+ - footfall-style count of bills in 2024
+     asked: I wasn't sure which time you meant.
+ - takings in Kolkata
+     asked: I wasn't sure which time you meant.
+ - total revnue
+     asked: I wasn't sure which time you meant.
+ - profit in Bengluru
+     asked: I wasn't sure which time you meant.
+ - total sales in FY25
+     asked: I wasn't sure which time you meant.
+ - units sold in FY 2023-24
+     A proportion needs something to group by.
+ - average order value in Q2 FY26
+     asked: I wasn't sure which time you meant.
+ - kitni sale hui 2024 mein
+     asked: I wasn't sure which time you meant.
+ - pichle mahine ka profit
+     asked: I wasn't sure which metric you meant.
+ - is saal ke total orders
+     asked: I wasn't sure which dimension you meant.
+ - Mumbai mein kitna profit hua
+     asked: I wasn't sure which metric you meant.
+ - pichli quarter ki sales
+     asked: I wasn't sure which time you meant.
+ - profit by store region for Technology in 2025
+     asked: I wasn't sure which time you meant.
+ - top 3 products by sales in the North region
+     Could not interpret the question: 1 validation error for QueryFrame
+  Invalid JSON: control character (\u0000-\u001F) found while parsing a string at line 2 column 0 [type=json_invalid, input_value='{"intent": "proportion",...time", "time", "time"]}', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
+ - share of Consumer sales by category
+     asked: I wasn't sure which time you meant.
+ - units sold of Laptops by city
+     asked: I wasn't sure which time you meant.
+ - monthly sales for Corporate customers in the Delhi Store
+     asked: I wasn't sure which time you meant.
+ - profit by customer region for Office Supplies in 2024
+     asked: I wasn't sure which time you meant.
+ - which sub category earns the most in Pune
+     asked: I wasn't sure which metric you meant.
+ - number of orders by category in West region
+     asked: I wasn't sure which time you meant.
+ - sales by sub category in Q1 2025 for Consumer customers
+     asked: I wasn't sure which time you meant.
+ - how are Technology profits distributed in 2023
+     asked: I wasn't sure which dimension you meant.
+ - average order value by category
+     asked: I wasn't sure which time you meant.
+ - weekly sales of Chairs in 2025
+     asked: I wasn't sure which time you meant.
+ - sales by store for Phones in 2025
+     asked: I wasn't sure which time you meant.
+ - what is the profit margin of each sub category
+     asked: I wasn't sure which metric you meant.
+ - sales by city and what share each is
+     asked: I wasn't sure which time you meant.
+ - monthly orders for Consumer customers in 2024
+     asked: I wasn't sure which time you meant.
+ - profit by category in Bhubaneswar
+     asked: I wasn't sure which dimension you meant.
+ - total units for Technology in Q4 2025
+     asked: I wasn't sure which time you meant.
+ - compare sales for Consumer and Corporate
+     asked: I wasn't sure which time you meant.
+ - top 3 stores by sales to Corporate customers
+     asked: I wasn't sure which time you meant.
+ - sales of Tables and Chairs by month in 2025
+     asked: I wasn't sure which time you meant.
+ - monthly profit for 2025 -> split it by category
+     final turn got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["filters","time"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - top 5 cities by sales -> what about profit instead
+     final turn got {"intent":"proportion","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["metric","metric","metric"],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by store -> now the average
+     final turn got {"intent":"summary","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"AVG"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - total sales -> for Mumbai
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[{"column":"cust_city","op":"=","value":"Mumbai"}],"top_n":null,"order":"desc","ambiguous":["metric","metric"],"rules":[]}
+     want {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"cust_city","op":"=","value":"Mumbai"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - profit by region -> only Technology
+     final turn got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"category","op":"=","value":"Technology"}],"top_n":null,"order":"desc","ambiguous":["dimension","time","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"store_region","time":null,"filters":[{"column":"category","op":"=","value":"Technology"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by category in 2024 -> and for 2025
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","dimension"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":null,"start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - units by sub category -> show only the top 3
+     final turn got {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"quantity","agg":"SUM"},"dimension":"sub_category","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+ - monthly sales in 2024 -> make it quarterly
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"quarter","start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"quarter","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by city -> only Consumer customers
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[{"column":"cust_seg","op":"=","value":"Consumer"}],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[{"column":"cust_seg","op":"=","value":"Consumer"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - total profit in 2025 -> and 2024
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","time","time"],"rules":[]}
+     want {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by store region -> now for Furniture
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[{"column":"category","op":"=","value":"Furniture"}],"top_n":null,"order":"desc","ambiguous":["filters","time","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":null,"filters":[{"column":"category","op":"=","value":"Furniture"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - profit by category -> what is the average instead of the total
+     final turn got {"intent":"summary","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"AVG"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - weekly sales in October 2025 -> same for November
+     final turn got {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-11-01","end":"2025-11-30"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"week","start":"2025-11-01","end":"2025-11-30"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - top 3 stores by profit -> top 5 instead
+     final turn got {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+ - share of sales by category -> only 2025
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","time","time"],"rules":[]}
+     want {"intent":"proportion","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":null,"start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by sub category -> just Technology -> in 2024
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","time","time"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"sub_category","time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[{"column":"category","op":"=","value":"Technology"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - average order value by store -> only for last year
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","time","time"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":"store_name","time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by outlet -> now by town
+     final turn got {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - region wise sales -> ab profit dikhao
+     final turn got {"intent":"proportion","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["dimension","time"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"store_region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - monthly profit -> for Q3 FY25
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-10-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","time","time"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-10-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - units sold by city -> make that a pie chart
+     final turn got There is nothing to show as a pie chart yet. Ask a question first, for example "sales by category", then ask for the chart.
+     want {"intent":"proportion","metric":{"column":"quantity","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - profit trend for 2025 -> only Consumer customers
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[{"column":"cust_seg","op":"=","value":"Consumer"}],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[{"column":"cust_seg","op":"=","value":"Consumer"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - total sales for Corporate customers -> by month in 2024
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[{"column":"cust_seg","op":"=","value":"Corporate"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by store -> which one is highest
+     final turn got {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":["time","filters"],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+ - quantity by category -> and the profit
+     final turn got {"intent":"proportion","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["metric","dimension"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - revenue in 2023 -> what about 2025
+     final turn got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":["time","time","time"],"rules":[]}
+     want {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2025-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}

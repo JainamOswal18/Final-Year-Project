@@ -1,0 +1,20 @@
+model: models/qwen2.5-0.5b-instruct-q4_k_m.gguf | prompt: full | rules: always
+matching by meaning: on
+
+40 cases: 40 answerable questions
+  intent      90.0%  (36/40)
+  metric      95.0%  (38/40)
+  dimension   95.0%  (38/40)
+  time        95.0%  (38/40)
+  filters     95.0%  (38/40)
+  execution   95.0%  (38/40)
+  chart       92.5%  (37/40)
+  model alone (before rules): intent 57.5%, metric_column 100.0%, dimension 52.5%
+  asked a clarifying question instead of answering: 2 (counted as not answered above)
+  latency    p50 708 ms | p95 854 ms | max 1802 ms
+
+Failures:
+ - sales in the West store region by category
+     asked: I wasn't sure which time you meant.
+ - overall sales for large orders in 2025
+     asked: I wasn't sure which dimension you meant.

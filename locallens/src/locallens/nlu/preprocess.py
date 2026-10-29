@@ -160,8 +160,22 @@ def _fiscal_mention(t: str, today: date, fiscal_start: int) -> DateHint | None:
     return None
 
 
+HINGLISH_DATES = [
+    (r"\bpich(?:h)?l[ei]\s+(?:quarter|timahi)\b", "last quarter"), (r"\bis+\s+(?:quarter|timahi)\b", "this quarter"),
+    (r"\bpich(?:h)?l[ae]\s+(?:mahin[ea]|month)\b", "last month"), (r"\bis+\s+mahin[ea]\b", "this month"),
+    (r"\bpich(?:h)?l[ae]\s+(?:saal|sal|varsh)\b", "last year"), (r"\bis+\s+(?:saal|sal|varsh)\b", "this year"),
+]
+
+
+def _english_dates(t: str) -> str:
+    """"pichle mahine" -> "last month": common Hinglish date words, so the resolver below needs only one vocabulary."""
+    for pat, eng in HINGLISH_DATES:
+        t = re.sub(pat, eng, t)
+    return t
+
+
 def resolve_dates(text: str, today: date, fiscal_start: int = 1) -> DateHint | None:
-    t = text.lower()
+    t = _english_dates(text.lower())
     fy_now = _fy_start_year(today, fiscal_start)
     q_now = ((today.month - fiscal_start) % 12) // 3 + 1
     hit = _fiscal_mention(t, today, fiscal_start)
@@ -287,14 +301,29 @@ def normalise_spelling(text: str, reg: Registry) -> tuple[str, list[tuple[str, s
 def preprocess(question: str, reg: Registry, today: date, term_index=None) -> Preprocessed:
     text = " ".join(question.strip().split())
     text = re.sub(r"(?<=[A-Za-z])-(?=[A-Za-z])", " ", text)   # "sub-category" -> "sub category" (dates keep their dashes)
+    text = " ".join(re.sub(r"[\[\]]", " ", text).split())     # brackets mark the code's own hints in the prompt
     if not text:
         raise ValueError("Empty question.")
     text, fixes = normalise_spelling(text, reg)
     pre = Preprocessed(text, resolve_dates(text, today, reg.fiscal_start_month), fixes, _ambiguous(text, reg), _hints(text, reg),
                        _value_mentions(text, reg))
+    _add_glossary_hints(pre, reg)
     if term_index is not None:
         _add_semantic_hints(pre, reg, term_index)
     return pre
+
+
+def _add_glossary_hints(pre: Preprocessed, reg: Registry) -> None:
+    """Retail words the dataset does not use ("outlet", "town", "pieces") mapped to its columns (nlu/retail_terms.py)."""
+    from .retail_terms import glossary_hints
+
+    covered = {w for p in pre.column_hints for w in re.findall(r"[a-z]+", p)}
+    covered |= {w for _, v in pre.value_mentions for w in re.findall(r"[a-z]+", v.lower())}
+    covered |= {w for p in pre.ambiguous_terms for w in re.findall(r"[a-z]+", p)}
+    for term, col in glossary_hints(pre.text, reg, covered):
+        if col not in pre.column_hints.values():     # never second-guess a direct match
+            pre.column_hints[term] = col
+            pre.semantic.append((term, col))
 
 
 def _add_semantic_hints(pre: Preprocessed, reg: Registry, index) -> None:

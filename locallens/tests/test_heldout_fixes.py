@@ -174,7 +174,7 @@ def test_value_beside_its_column_name_needs_no_question(sreg, scon):
 from locallens.nlu.preprocess import unknown_group_term  # noqa: E402
 
 
-@pytest.mark.parametrize("q,word", [("units sold by town", "town"), ("sales for each outlet", "outlet"), ("profit per widget", "widget")])
+@pytest.mark.parametrize("q,word", [("units sold by locality", "locality"), ("sales for each courier", "courier"), ("profit per widget", "widget")])
 def test_unknown_grouping_word_is_found(sreg, q, word):
     assert unknown_group_term(preprocess(q, sreg, TODAY), sreg) == word
 
@@ -187,7 +187,7 @@ def test_known_grouping_words_are_not_questioned(sreg, q):
 
 def test_unknown_grouping_word_asks_and_the_answer_is_used(sreg, scon):
     slm = FakeSLM({"intent": "summary", "metric": {"column": "quantity", "agg": "SUM"}})
-    r = pipeline.ask("units sold by town", sreg, scon, slm)
+    r = pipeline.ask("units sold by locality", sreg, scon, slm)
     assert r.clarification and r.clarification.field == "dimension" and "cust_city" in r.clarification.options and slm.calls == []
-    again = pipeline.ask("units sold by town", sreg, scon, slm, overrides={"dimension": "cust_city"})
+    again = pipeline.ask("units sold by locality", sreg, scon, slm, overrides={"dimension": "cust_city"})
     assert again.error == "" and again.frame.intent == "comparison" and again.frame.dimension == "cust_city" and len(again.df) == 8

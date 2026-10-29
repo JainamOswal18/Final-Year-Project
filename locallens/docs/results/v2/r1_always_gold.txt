@@ -1,0 +1,15 @@
+model: models/finetuned/locallens-colab-q8_0.gguf | prompt: compact | rules: always
+matching by meaning: on
+
+48 cases: 48 answerable questions
+  intent     100.0%  (48/48)
+  metric     100.0%  (48/48)
+  dimension  100.0%  (48/48)
+  time        97.9%  (47/48)
+  filters    100.0%  (48/48)
+  execution  100.0%  (48/48)
+  chart      100.0%  (48/48)
+  model alone (before rules): intent 100.0%, metric_column 100.0%, dimension 100.0%
+  latency    p50 633 ms | p95 1380 ms | max 1679 ms
+
+Failures:

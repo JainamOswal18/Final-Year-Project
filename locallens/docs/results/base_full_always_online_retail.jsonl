@@ -1,0 +1,55 @@
+{"q": "monthly revenue in 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 2356.804084032774}
+{"q": "revenue by month for 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 826.3143340009265}
+{"q": "quarterly revenue for 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 833.8445000117645}
+{"q": "how many units were sold each month in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 932.6936249854043}
+{"q": "weekly revenue in November 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 779.5535839977674}
+{"q": "daily orders in the first week of March 2011", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 853.231874993071}
+{"q": "yearly revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 827.8598330216482}
+{"q": "monthly revenue from Germany in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 796.2556250276975}
+{"q": "monthly average order value for 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 880.3683750447817}
+{"q": "monthly revenue by country in 2010 for France and Germany", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 867.0096249552444}
+{"q": "monthly orders for the United Kingdom in 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 801.7406659782864}
+{"q": "revenue trend over all months", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 757.7538749901578}
+{"q": "revenue by country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 762.4529169988818}
+{"q": "units sold by country in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 867.8219169960357}
+{"q": "number of orders by country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 772.0478340052068}
+{"q": "average order value by country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 785.3717089747079}
+{"q": "average unit price by country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 739.3247090512887}
+{"q": "compare revenue between Germany and France", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": true, "ms": null}
+{"q": "revenue by product in 2011", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 882.338666007854}
+{"q": "revenue by market for 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 830.35895798821}
+{"q": "quantity per customer", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 748.8772500073537}
+{"q": "orders by customer in 2010", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": true, "ms": 1011.4398329751566}
+{"q": "maximum unit price by country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 768.6285829986446}
+{"q": "units by product for the United Kingdom", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 736.5264169638976}
+{"q": "top 5 countries by revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 859.6627080114558}
+{"q": "top 10 products by revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 888.0373329739086}
+{"q": "top 10 products by units sold in 2011", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": true, "ms": 920.3790000174195}
+{"q": "which country has the most orders", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 747.5000830017962}
+{"q": "top 5 customers by revenue", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": true, "ms": 828.5131669836119}
+{"q": "top 3 countries by average order value", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 846.1776250042021}
+{"q": "best selling items in 2010", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 871.5513750212267}
+{"q": "top 5 products by revenue in Germany", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 856.8899169913493}
+{"q": "which product sold the most units", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 836.0920419800095}
+{"q": "top 5 stock codes by revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 838.4852909948677}
+{"q": "country with the highest revenue last month", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 861.1041670083068}
+{"q": "share of revenue by country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 846.2055419804528}
+{"q": "what percentage of orders comes from each country", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 816.8763749999925}
+{"q": "share of units by country in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 892.9609999759123}
+{"q": "distribution of unit price", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 692.021416965872}
+{"q": "histogram of quantity per line", "kind": "question", "tags": [], "ok": false, "asked": true, "raw_ok": null, "ms": null}
+{"q": "distribution of revenue per line in 2011", "kind": "question", "tags": [], "ok": false, "asked": true, "raw_ok": null, "ms": null}
+{"q": "total revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 732.4435410555452}
+{"q": "total revenue in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 896.2934159790166}
+{"q": "how many units did we sell in 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 824.4787909789011}
+{"q": "number of orders in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 792.9124580114149}
+{"q": "average order value in 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 832.4612500146031}
+{"q": "average unit price", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 743.2311669690534}
+{"q": "revenue from Germany", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 734.3117919517681}
+{"q": "units sold in the United Kingdom in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 802.6270840200596}
+{"q": "revenue last month", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 808.6392499972135}
+{"q": "highest unit price", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": null}
+{"q": "total revenue in the last quarter", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 827.0062500378117}
+{"q": "orders from France in 2011", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 789.4172079977579}
+{"q": "revenue in Q4 2010", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 866.7615000158548}
+{"q": "total turnover in the Netherlands", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": false, "ms": 737.0680829626508}

@@ -1,0 +1,115 @@
+model: default | prompt: full | rules: off
+matching by meaning: on
+
+51 cases: 51 answerable questions
+  intent      47.1%  (24/51)
+  metric      66.7%  (34/51)
+  dimension   82.4%  (42/51)
+  time        84.3%  (43/51)
+  filters     84.3%  (43/51)
+  execution   45.1%  (23/51)
+  chart       47.1%  (24/51)
+  model alone (before rules): intent 47.1%, metric_column 94.1%, dimension 66.7%
+  latency    p50 740 ms | p95 1952 ms | max 2346 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       45.1% [32-59]      27.5% [17-41]
+  vocab                25.0% [5-70]       25.0% [5-70]       n=4
+
+Failures:
+ - total milk spend
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"Milk","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - total grocery spend
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"Grocery","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - total frozen spend
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"Frozen","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": null, "filters": [], "top_n": null, "ambiguous": []}
+ - fresh spend by channel
+     got {"intent":"summary","metric":{"column":"Fresh","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Fresh","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "Fresh", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - detergents and paper spend by channel
+     got {"intent":"distribution","metric":{"column":"Detergents_Paper","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Detergents_Paper","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Detergents_Paper", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - delicatessen spend by region
+     got {"intent":"distribution","metric":{"column":"Delicassen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Delicassen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Delicassen", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - average fresh spend by channel
+     got {"intent":"proportion","metric":{"column":"Fresh","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Fresh","agg":"AVG"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Fresh", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - average grocery spend per region
+     got {"intent":"proportion","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Grocery","agg":"AVG"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Grocery", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - total spend by channel
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"total_spend","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": null, "filters": [], "top_n": null, "ambiguous": []}
+ - total spend by region
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"total_spend","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - average milk spend for Retail customers by region
+     got {"intent":"proportion","metric":{"column":"Milk","agg":"SUM"},"dimension":"Region","time":null,"filters":[{"column":"Channel","op":"=","value":"Retail"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Milk","agg":"AVG"},"dimension":"Region","time":null,"filters":[{"column":"Channel","op":"=","value":"Retail"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Milk", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - fresh spend by region for Horeca customers
+     got {"intent":"distribution","metric":{"column":"Fresh","agg":"SUM"},"dimension":"Region","time":null,"filters":[{"column":"Channel","op":"=","value":"Horeca"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Fresh","agg":"SUM"},"dimension":"Region","time":null,"filters":[{"column":"Channel","op":"=","value":"Horeca"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Fresh", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - maximum frozen spend by channel
+     got {"intent":"proportion","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Frozen","agg":"MAX"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Frozen", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - minimum grocery spend by region
+     got {"intent":"proportion","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Grocery","agg":"MIN"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Grocery", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - which region spends the most on milk
+     got {"intent":"proportion","metric":{"column":"Milk","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Milk","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Milk", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - which channel spends the most on grocery
+     got {"intent":"proportion","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Channel","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Grocery", "agg": "SUM"}, "dimension": "Channel", "filters": [], "top_n": null, "ambiguous": []}
+ - which region spends the least on frozen food
+     got {"intent":"distribution","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Frozen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Frozen", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - fresh spend in Oporto
+     A trend needs a date column.
+ - grocery spend for Horeca customers
+     A proportion needs something to group by.
+ - average fresh spend
+     A proportion needs something to group by.
+ - highest milk spend
+     A proportion needs something to group by.
+ - lowest delicatessen spend
+     A proportion needs something to group by.
+ - frozen spend for Retail customers in Lisbon
+     A trend needs a date column.
+ - dairy spend by area
+     got {"intent":"distribution","metric":{"column":"Milk","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Milk","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Milk", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - deli spend by region
+     got {"intent":"distribution","metric":{"column":"Delicassen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Delicassen","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Delicassen", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - top region for groceries
+     got {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Grocery", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}
+ - fresh spend for Lisbon by channel
+     A trend needs a date column.
+ - average frozen spend in Oporto
+     A proportion needs something to group by.

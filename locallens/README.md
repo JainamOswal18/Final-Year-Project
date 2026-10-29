@@ -67,7 +67,9 @@ Everything is stored under `data/server/` — **back that folder up**; it holds 
 |---|---|---|
 | `LOCALLENS_HOST` / `LOCALLENS_PORT` | `127.0.0.1` / `8000` | where to listen |
 | `LOCALLENS_DATA_DIR` | `data/server` | database, uploads, logs |
-| `LOCALLENS_MODEL_PATH` | `models/qwen2.5-0.5b-instruct-q4_k_m.gguf` | language model |
+| `LOCALLENS_MODEL_PATH` | `models/locallens-q4_k_m.gguf` if present, else `models/qwen2.5-0.5b-instruct-q4_k_m.gguf` | language model (the first is the fine-tuned one, see `docs/FINETUNING.md`) |
+| `LOCALLENS_PROMPT_STYLE` | `compact` for the fine-tuned model, `full` for the original | `compact` leaves out the fixed examples (the original model needs `full`) |
+| `LOCALLENS_RULES` | `always` | `fired`: the model decides the question type when no keyword fires (for the fine-tuned model) |
 | `LOCALLENS_EMBEDDINGS` | `1` | match unknown words by meaning (uses the 35 MB model if present) |
 | `LOCALLENS_N_THREADS` | automatic | CPU threads for the model; use the number of fast cores |
 | `LOCALLENS_MODEL_TIME_BUDGET_S` | `30` | give up on a stalled generation |
@@ -99,5 +101,5 @@ cd web && npm run typecheck && npm test && npm run build
 
 ## Not done yet
 
-Fine-tuning the model on retail questions; Tableau export; single sign-on; a check of the Power BI project in
+Making the fine-tuned model the default (a fine-tuned retail model exists and is opt-in: see `docs/FINETUNING.md`; one failure on a differently shaped dataset has to be fixed first); Tableau export; single sign-on; a check of the Power BI project in
 Power BI Desktop; measuring speed on the weakest team laptop (8 GB). See `docs/EVAL.md` for known accuracy limits.

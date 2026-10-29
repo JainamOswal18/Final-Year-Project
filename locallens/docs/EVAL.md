@@ -51,6 +51,22 @@ direct test, with **no false matches on greetings and filler words**. On the thi
 first-run score from 73% to 83%. It is weak at telling domain words apart: "town", "outlet" and "pieces" were
 not matched, which is why the clarifying question matters more than the embeddings.
 
+## Fine-tuned model, measured (held-out 4 and two unseen schemas)
+
+Full report: `docs/FINETUNING.md`; raw runs in `docs/results/v2/`. Final-answer accuracy, all three run through the same pipeline. Held-out 4 was frozen before training.
+Round 2 is the default model.
+
+| Set | Rules | Original | Round 1 | **Round 2** |
+|---|---|---|---|---|
+| held-out 4 (233 cases) | `always` | 84.1% | 85.8% | 84.1% (same as the original, p = 1.0) |
+| held-out 4 | `fired` | 77.7% | 87.1% | 85.8% (vs original p = 0.0005) |
+| held-out 4 | `off` (model alone) | 50.2% | 83.3% | 80.3% (vs original p < 0.0001) |
+| Online Retail II (55) | `always` / `off` | 74.5% / 38.2% | 76.4% / 78.2% | 76.4% / 76.4% |
+| Wholesale customers (51) | `always` / `off` | 86.3% / 45.1% | **13.7%** / 15.7% | 88.2% / 92.2% |
+
+Round 1 broke Wholesale (it picked the generic metric when a question named two); round 2's data covers that case. Wholesale is therefore a regression check, not an unseen score, for round 2.
+The honest summary: with the rules on, the fine-tuned model is as accurate as the original; its gain is what the model does by itself and a shorter prompt. It is not faster.
+
 ## Known limits
 
 * The data is synthetic and the questions were written by the same team, in English only.
@@ -61,5 +77,15 @@ not matched, which is why the clarifying question matters more than the embeddin
 ## How to run
 
 ```
-python eval/run_eval.py --set gold|heldout|heldout2|heldout3 [--show-failures] [--no-embeddings]
+python eval/run_eval.py --set gold|heldout|heldout2|heldout3|heldout4|online_retail|wholesale [--show-failures] [--no-embeddings]
+                        [--rules always|fired|off] [--model path/to/other.gguf] [--prompt-style full|compact]
+                        [--out run.jsonl] [--no-sequences]
+python eval/compare.py a.jsonl b.jsonl      # paired McNemar test between two runs
 ```
+
+* `--rules always` (default, same as the app): keyword rules decide the question type and aggregation, and their
+  fallbacks decide when no keyword fires. `fired`: the model decides when no keyword fires. `off`: no keyword rules
+  (grounding, dates and the SQL check still apply). Use these to see what the model contributes, e.g. base vs fine-tuned.
+* `--model` runs another GGUF file, such as a fine-tuned model, through the same questions.
+* The report also prints **model alone (before rules)**: how often the model's own frame had the right intent,
+  metric column and grouping. Failures show the model's raw frame next to the final one.

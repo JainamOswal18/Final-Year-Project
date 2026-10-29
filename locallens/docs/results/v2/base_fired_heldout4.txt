@@ -1,0 +1,192 @@
+model: models/qwen2.5-0.5b-instruct-q4_k_m.gguf | prompt: full | rules: fired
+matching by meaning: on
+
+233 cases: 192 answerable questions, 12 that should be refused or asked about, 29 multi-turn conversations
+  intent      82.3%  (158/192)
+  metric      89.1%  (171/192)
+  dimension   88.5%  (170/192)
+  time        89.6%  (172/192)
+  filters     89.1%  (171/192)
+  execution   78.1%  (150/192)
+  chart       82.3%  (158/192)
+  model alone (before rules): intent 56.8%, metric_column 97.9%, dimension 60.4%
+  should-ask handled correctly: 83.3% [55-95]  |  over-asking: 0/192  |  under-asking: 2/12
+  latency    p50 707 ms | p95 1059 ms | max 1721 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       78.1% [72-83]      39.1% [32-46]
+  agg                  61.9% [41-79]      31.6% [15-54]      n=21
+  followup             72.4% [54-85]      -                  n=29
+  hinglish             36.8% [19-59]      22.2% [9-45]       n=19
+  indian_fy            94.7% [75-99]      41.2% [22-64]      n=19
+  intent_no_keyword    78.3% [58-90]      8.7% [2-27]        n=23
+  multi_table          81.4% [74-87]      45.7% [37-54]      n=129
+  typo                 91.7% [65-99]      58.3% [32-81]      n=12
+  vocab                82.6% [63-93]      36.4% [20-57]      n=23
+  multi-turn (final)   72.4% [54-85]  n=29
+
+Failures:
+ - revenue month by month since the start of 2024
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - profit by month for the last 6 months
+     got {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-07-04","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-07-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - daily orders during the last week of December 2025
+     got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-12-01","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-12-25","end":"2025-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - how has profit moved from quarter to quarter
+     got {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"quarter","start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "store_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - sales trend for Furniture and Technology in 2023
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[{"column":"category","op":"=","value":"Technology"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":{"column":"order_date","grain":"month","start":"2023-01-01","end":"2023-12-31"},"filters":[{"column":"category","op":"in","value":"Furniture,Technology"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "product_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - daily sales in the first week of January 2025
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-01-01","end":"2025-01-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"day","start":"2025-01-01","end":"2025-01-07"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - month wise sales 2024 dikhao
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - is saal mahine ke hisab se sales
+     A proportion needs something to group by.
+ - how do Mumbai and Delhi compare on sales
+     A comparison needs something to group by.
+ - profit for every sub category
+     got {"intent":"summary","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"sub_category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "sub_category", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - largest single order by city
+     got {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"MAX"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - smallest order value in each category
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":1,"order":"asc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"MIN"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - region wise sales
+     got {"intent":"distribution","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - outlet wise GMV 2024 mein
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - segment wise average order value
+     got {"intent":"summary","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":"cust_seg","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "avg_order_value", "agg": "SUM"}, "dimension": "cust_seg", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - lowest 3 cities by revenue
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"asc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": 3, "ambiguous": []}
+ - which city had the highest sales last quarter
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"MAX"},"dimension":"cust_city","time":{"column":"order_date","grain":"month","start":"2025-07-01","end":"2025-09-30"},"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":{"column":"order_date","grain":null,"start":"2025-07-01","end":"2025-09-30"},"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "MAX"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - biggest 5 products by revenue in Mumbai
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"product_name","time":null,"filters":[{"column":"cust_city","op":"=","value":"Mumbai"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"product_name","time":null,"filters":[{"column":"cust_city","op":"=","value":"Mumbai"}],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "cust_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - which category has the biggest single order
+     got {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":"category","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"MAX"},"dimension":"category","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "category", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - best performing stors by profit
+     A ranking needs something to group by.
+ - sabse zyada sales wali city
+     got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "cust_city", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - sabse kam profit wala store
+     got {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"profit","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "profit", "agg": "SUM"}, "dimension": "store_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - biggest order value ever
+     A proportion needs something to group by.
+ - smallest profit on a single order
+     A proportion needs something to group by.
+ - largest quantity in one order in 2024
+     got {"intent":"trend","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"quantity","agg":"MAX"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": "cust_seg", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - profit margin in Q2 2025
+     profit margin can't be split into shares. Try a comparison instead.
+ - profit from Corporate customers in 2025
+     A proportion needs something to group by.
+ - units sold in the Furniture category in 2023
+     A proportion needs something to group by.
+ - how much did the Delhi Store sell in 2025
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[{"column":"cust_city","op":"=","value":"Delhi"},{"column":"store_name","op":"=","value":"Delhi Store"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2025-01-01","end":"2025-12-31"},"filters":[{"column":"store_name","op":"=","value":"Delhi Store"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - sales to Home Office customers in the East region
+     A comparison needs something to group by.
+ - total sales for orders with quantity above 5
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"quantity","op":">","value":"5"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - profit on orders under 100 units
+     A proportion needs something to group by.
+ - footfall-style count of bills in 2024
+     order count is a calculated total, so it has no spread of values. Try a trend or a comparison.
+ - units sold in FY 2023-24
+     got {"intent":"distribution","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2023-04-01","end":"2024-03-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2023-04-01","end":"2024-03-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": "cust_seg", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - kitni sale hui 2024 mein
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "order_size", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - pichle mahine ka profit
+     A comparison needs something to group by.
+ - Mumbai mein kitna profit hua
+     A proportion needs something to group by.
+ - pichli quarter ki sales
+     A proportion needs something to group by.
+ - write me a poem about sales
+     should have asked or refused, but answered: {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - delete all orders
+     should have asked or refused, but answered: {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":null,"start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - monthly sales for Corporate customers in the Delhi Store
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":null,"end":null},"filters":[{"column":"cust_seg","op":"=","value":"Corporate"},{"column":"cust_city","op":"=","value":"Delhi"},{"column":"store_name","op":"=","value":"Delhi Store"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":null,"end":null},"filters":[{"column":"cust_seg","op":"=","value":"Corporate"},{"column":"store_name","op":"=","value":"Delhi Store"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "cust_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - revenue from Bookcases in 2024
+     A proportion needs something to group by.
+ - compare sales for Consumer and Corporate
+     A comparison needs something to group by.
+ - sales of Tables and Chairs by month in 2025
+     got {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[{"column":"sub_category","op":"=","value":"Tables"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"sub_category","time":{"column":"order_date","grain":"month","start":"2025-01-01","end":"2025-12-31"},"filters":[{"column":"sub_category","op":"in","value":"Tables,Chairs"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - sales by store -> now the average
+     final turn got {"intent":"comparison","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":["time","filters","filters"],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"AVG"},"dimension":"store_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - units by sub category -> show only the top 3
+     final turn got {"intent":"ranking","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"quantity","agg":"SUM"},"dimension":"sub_category","time":null,"filters":[],"top_n":3,"order":"desc","ambiguous":[],"rules":[]}
+ - monthly sales in 2024 -> make it quarterly
+     final turn got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"quarter","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - profit by category -> what is the average instead of the total
+     final turn got {"intent":"summary","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"AVG"},"dimension":"category","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by outlet -> now by town
+     final turn got {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"cust_city","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - region wise sales -> ab profit dikhao
+     final turn got {"intent":"proportion","metric":{"column":"profit","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"profit","agg":"SUM"},"dimension":"store_region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - total sales for Corporate customers -> by month in 2024
+     final turn got {"intent":"trend","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":{"column":"order_date","grain":"month","start":"2024-01-01","end":"2024-12-31"},"filters":[{"column":"cust_seg","op":"=","value":"Corporate"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+ - sales by store -> which one is highest
+     final turn got {"intent":"ranking","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_name","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}

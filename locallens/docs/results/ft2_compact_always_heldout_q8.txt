@@ -1,0 +1,19 @@
+model: models/finetuned/locallens-r2-q8_0.gguf | prompt: compact | rules: always
+matching by meaning: on
+
+50 cases: 50 answerable questions
+  intent      96.0%  (48/50)
+  metric      98.0%  (49/50)
+  dimension  100.0%  (50/50)
+  time       100.0%  (50/50)
+  filters    100.0%  (50/50)
+  execution   98.0%  (49/50)
+  chart       98.0%  (49/50)
+  model alone (before rules): intent 92.0%, metric_column 98.0%, dimension 92.0%
+  latency    p50 629 ms | p95 1374 ms | max 1719 ms
+
+Failures:
+ - best selling products by units
+     got {"intent":"ranking","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"product_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"quantity","agg":"SUM"},"dimension":"product_name","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "product_name", "time": null, "filters": [], "top_n": null, "ambiguous": []}

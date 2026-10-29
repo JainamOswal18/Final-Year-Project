@@ -44,6 +44,18 @@ class Result:
     chart_forced: str | None = None      # the chart the user asked for in words, if any
 
 
+def label_dimension(df: pd.DataFrame, frame: QueryFrame) -> pd.DataFrame:
+    """A group-by column that happens to be numeric (a customer or store ID) is a label, not a quantity:
+    show it as text so the chart rules treat it as a category."""
+    d = frame.dimension
+    if d and d in df.columns and pd.api.types.is_numeric_dtype(df[d]):
+        df = df.copy()
+        col = df[d]
+        whole = col.dropna().map(float.is_integer).all() if pd.api.types.is_float_dtype(col) else True
+        df[d] = col.astype("Int64").astype(str) if whole else col.astype(str)
+    return df
+
+
 def data_today(con: duckdb.DuckDBPyConnection, reg: Registry) -> date:
     dates = reg.tagged("date")
     if not dates:
@@ -96,8 +108,28 @@ def _ground_filters(frame: QueryFrame, text: str, reg: Registry, prev: QueryFram
             if not all(v.lower() in real for v in vals):
                 continue
             f.value = ",".join(real[v.lower()] for v in vals)
+        elif col and f.op in ("=", "!=", "in") and col.samples and all(_is_number(s) for s in col.samples) \
+                and not all(_is_number(v) for v in vals):
+            continue                                   # a numeric ID column "equal to" a word: the model guessed the column
         kept.append(f)
     frame.filters = kept
+
+
+def _is_number(s: str) -> bool:
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def _ground_ambiguous(frame: QueryFrame, pre: Preprocessed, reg: Registry) -> None:
+    """A field the question names outright is not ambiguous, whatever the model says: "compare sales by category"
+    names its metric, its grouping and nothing is unclear. Only fields the question leaves open stay flagged."""
+    hinted = set(pre.column_hints.values())
+    named = {"metric": set(reg.metric_names()), "dimension": {c.flat_name for c in reg.tagged("dimension")}}
+    frame.ambiguous = [f for f in frame.ambiguous
+                       if not ((f in named and hinted & named[f]) or (f == "time" and pre.date_hint))]
 
 
 def _value_beside_column(text: str, value: str, phrases: list[str]) -> bool:
@@ -172,8 +204,16 @@ def _add_value_filters(frame: QueryFrame, pre: Preprocessed, resolved: dict[str,
             frame.filters.append(Filter(column=col, op="=", value=val))
 
 
-def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_agg: str = "SUM") -> None:
-    """Rule-assisted overrides: where a keyword rule fires, it beats the model."""
+RULES_MODES = ("always", "fired", "off")
+
+
+def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_agg: str = "SUM",
+                 mode: str = "always") -> None:
+    """Rule-assisted overrides: where a keyword rule fires, it beats the model.
+
+    mode "always": the rules also decide intent and aggregation when no keyword fired (their fallbacks).
+    mode "fired":  without a keyword, the model's intent and aggregation stand (for a fine-tuned model).
+    """
     dates = reg.tagged("date")
     dim_cols = {c.flat_name for c in reg.tagged("dimension")}
     # a dimension phrase that is not just a filter value ("by city", not "corporate customers")
@@ -183,9 +223,10 @@ def _apply_rules(frame: QueryFrame, pre: Preprocessed, reg: Registry, default_ag
     h = infer(pre.text, has_dim, bool(dates), singular, default_agg)
     if h.order:
         frame.order = h.order
-    if h.intent:
+    if h.intent and not (mode == "fired" and h.intent_is_fallback):
         frame.intent = h.intent
-    frame.metric.agg = h.agg or frame.metric.agg
+    if not (mode == "fired" and h.agg_is_default and default_agg == "SUM"):   # a saved non-SUM default still applies
+        frame.metric.agg = h.agg or frame.metric.agg
     if h.agg_is_default and frame.intent == "proportion":
         frame.metric.agg = "SUM"          # a share of an average is not a share of anything
     # a limit must come from the question (a number or a singular superlative); the model's own guess is dropped
@@ -343,7 +384,7 @@ def _finish(res: Result, frame: QueryFrame, reg: Registry, con: duckdb.DuckDBPyC
         res.sql = sql
         res.timings_ms["sql"] = (time.perf_counter() - t2) * 1000
         t3 = time.perf_counter()
-        res.df = engine.run(con, sql)
+        res.df = label_dimension(engine.run(con, sql), frame)
         res.timings_ms["query"] = (time.perf_counter() - t3) * 1000
         if res.df.empty:
             res.error = "The query returned no rows. Try a different date range or filter."
@@ -352,6 +393,9 @@ def _finish(res: Result, frame: QueryFrame, reg: Registry, con: duckdb.DuckDBPyC
         res.chart_forced = force
     except FrameError as e:
         res.error = str(e)
+        return res
+    except duckdb.Error as e:
+        res.error = f"The data could not answer that as asked ({str(e).splitlines()[0][:160]}). Try rephrasing it."
         return res
     res.timings_ms["total"] = (time.perf_counter() - t0) * 1000
     session.last_frame = frame
@@ -374,8 +418,10 @@ def _chart_only(res: Result, chart: str, reg: Registry, con: duckdb.DuckDBPyConn
 def ask(
     question: str, reg: Registry, con: duckdb.DuckDBPyConnection, slm: FrameFiller,
     session: Session | None = None, prefs: dict | None = None, followup: bool = False,
-    overrides: dict[str, str] | None = None, term_index=None,
+    overrides: dict[str, str] | None = None, term_index=None, rules_mode: str = "always",
 ) -> Result:
+    if rules_mode not in RULES_MODES:
+        raise ValueError(f"rules_mode must be one of {RULES_MODES}")
     session = session or Session()
     res = Result(question=question)
     t0 = time.perf_counter()
@@ -440,8 +486,9 @@ def ask(
         frame = _carry_over(frame, prev, pre, reg, resolved_values)
     _ground_filters(frame, pre.text, reg, prev)
     _ground_dimension(frame, pre, reg, prev)
-    if not followup:
-        _apply_rules(frame, pre, reg, (prefs or {}).get("default_agg") or "SUM")
+    _ground_ambiguous(frame, pre, reg)
+    if not followup and rules_mode != "off":
+        _apply_rules(frame, pre, reg, (prefs or {}).get("default_agg") or "SUM", rules_mode)
     _add_value_filters(frame, pre, resolved_values)
     _ground_metric(frame, pre, reg)
     frame.rules = _select_rules(pre.text, reg, prev)

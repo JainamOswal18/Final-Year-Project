@@ -1,0 +1,55 @@
+{
+  "seed": 17,
+  "schemas": 110,
+  "train": 7624,
+  "val": 1107,
+  "dropped": {
+    "duplicate": 16,
+    "summary no date": 41,
+    "same as a test question": 61,
+    "trend no date": 46,
+    "distribution no date": 6,
+    "ranking unresolved": 9,
+    "comparison unresolved": 7,
+    "hinglish unresolved": 1,
+    "ranking no date": 24,
+    "proportion no date": 10,
+    "comparison no date": 22,
+    "summary unresolved": 5,
+    "followup base unresolved": 11,
+    "proportion unresolved": 4,
+    "trend unresolved": 2,
+    "nearly the same as a test question": 69,
+    "over the token limit": 0
+  },
+  "kinds": {
+    "trend": 1143,
+    "followup": 779,
+    "hinglish": 560,
+    "comparison": 1487,
+    "ranking": 1201,
+    "distribution": 415,
+    "ambiguous": 220,
+    "summary": 1289,
+    "proportion": 530
+  },
+  "styles": {
+    "compact": 6107,
+    "full": 1517
+  },
+  "tokens": {
+    "median": 602,
+    "max": 1557
+  },
+  "followups_with_previous_frame": 779,
+  "leakage_vs_heldout4": {
+    "heldout4_questions": 204,
+    "median_closest_training_question": 73.0,
+    "share_ge_90": 0.0,
+    "share_ge_95": 0.0,
+    "max": 88.9
+  },
+  "sources": {
+    "synthetic": "our own templates and vocabulary (finetune/synth.py)"
+  }
+}

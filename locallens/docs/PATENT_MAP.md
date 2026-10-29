@@ -13,7 +13,7 @@ Status key: **Done** = built and tested. **Partial** = built, with a stated gap.
 | 4 | Intent from the small model, one of a fixed set of IDs | `nlu/slm.py`, `nlu/rules.py` | **Done** | Model plus keyword rules. No separate trained classifier head (the description mentions one). |
 | 5 | SQL from a predefined template, schema check before running | `query/sqlgen.py`, `query/validator.py` | **Done** | The model never writes SQL. |
 | 6 | Result analysis: columns, types, time order, aggregation level, dimensionality, cardinality | `data/profiler.py` | **Partial** | Columns, types, time order and cardinality are measured. Aggregation level and dimensionality come from the question type. |
-| 7 | Domain adaptation with local embeddings; fixed context window | `nlu/embeddings.py`, `data/semantic.py`, `nlu/slm.py` | **Done** | Domain-adapted via locally stored embeddings and a semantic layer (custom metrics, rules, descriptions, verified examples). Prompt fitted to 2048 tokens. Embeddings help with about a third of unseen paraphrases. The model weights are not fine-tuned (not part of the claim). |
+| 7 | Domain adaptation with local embeddings; fixed context window | `nlu/embeddings.py`, `data/semantic.py`, `nlu/slm.py` | **Done** | Domain-adapted via locally stored embeddings and a semantic layer (custom metrics, rules, descriptions, verified examples). Prompt fitted to 2048 tokens. Embeddings help with about a third of unseen paraphrases. A LoRA fine-tuned model is also trained and evaluated (`docs/FINETUNING.md`): its own frame is right 95% of the time against 38% for the original model, and final accuracy rises 82% to 86% with the rules on and 50% to 84% without them; round 2 fixed a multi-metric failure on one dataset and is now the default model (final accuracy equal to the original with the rules on, 50% to 80% without them). |
 | 8 | Query validation plus deterministic templates | `query/validator.py` (sqlglot) | **Done** | |
 | 9 | Chart chosen from number of dimensions, time, aggregation, categorical vs continuous | `viz/charts.py`, `charts_rules.yaml` | **Done** | |
 | 10 | Config has chart ID, axis mapping, aggregation, sort, render metadata, from stored rules | Vega-Lite spec, rules file, saved preferences | **Done** | |
@@ -58,7 +58,7 @@ Status key: **Done** = built and tested. **Partial** = built, with a stated gap.
 | User feedback and iterative refinement | **Done** | Follow-ups ("now only for Technology"). Fixed a context-loss bug on 2026-10-22. |
 | Persistent preferences (chart style, aggregation default, sorting) | **Done** | Preferences page, per user: sort, chart per question type, default aggregation |
 | Access control: login and roles | **Done** | scrypt passwords, sessions, lockout, admin and user roles |
-| Fine-tuning on domain vocabulary (healthcare, finance, logistics, etc.) | **Not done, by choice** | Domain adaptation is done through embeddings and the semantic layer instead (claim 7). Demo data is retail only. |
+| Fine-tuning on domain vocabulary (healthcare, finance, logistics, etc.) | **Done for retail; default model** | LoRA fine-tune of the model on retail questions, trained and measured (`docs/FINETUNING.md`). Other domains are not trained. |
 | Supervised training on paired question and query data | **Not done** | Eval question sets exist (128 questions) but no training set |
 | Learning from human feedback (RLHF) | **Not done** | Thumbs and "Mark as correct" are stored; "Mark as correct" is used as a prompt example, not for training |
 | Intent classifier head or separate classifier | **Not done** | Model plus rules instead |
@@ -77,7 +77,7 @@ Financial calendar (April start by default; Q1 FY25, FY 2024-25 and bare Q2 are 
 4. Check that the CI workflow passes on GitHub (never run).
 
 **Patent gaps, largest first**
-5. Fine-tuning is no longer planned: domain adaptation is through embeddings and the semantic layer.
+5. Fine-tuning round 3 (optional): add "compare X by Y" contrast questions and more date-range arithmetic to recover the ~2% round 2 lost against round 1; measure speed and memory on the 4-core target.
 6. Tableau adapter (claim 13 says "at least one", so Power BI alone can satisfy it).
 7. More chart types (area, box, stacked, heat map, grouped) and variance-based histogram bins.
 8. Growth and period-over-period measures.

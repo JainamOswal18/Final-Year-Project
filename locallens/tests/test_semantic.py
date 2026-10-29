@@ -282,3 +282,13 @@ def test_odd_fiscal_start_months_shift_quarters(sreg, scon):
     t = {"column": "order_date", "grain": "quarter", "start": None, "end": None}
     df = scon.execute(build_sql(frame(intent="trend", dimension=None, time=t), r)).df()
     assert {d.month for d in df["period"]} <= {2, 5, 8, 11}
+
+
+def test_hinglish_date_words_resolve_like_english():
+    from datetime import date as d
+    from locallens.nlu.preprocess import resolve_dates
+    today = d(2025, 12, 31)
+    for hi, en in [("pichle mahine ka profit", "last month"), ("is saal ki sales", "this year"),
+                   ("pichli quarter ki sales", "last quarter"), ("pichle saal ka profit", "last year")]:
+        a, b = resolve_dates(hi, today), resolve_dates(en, today)
+        assert a and (a.start, a.end) == (b.start, b.end), hi

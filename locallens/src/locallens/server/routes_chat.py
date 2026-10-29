@@ -158,7 +158,8 @@ def ask(dataset_id: str, body: AskIn, user=Depends(current_user), rt: Runtime = 
             raise HTTPException(503, f"The language model is not available: {str(e)[:200]}") from e
         with ds.lock:
             res = pipeline.ask(question, ds.reg, ds.con, slm, session, load_prefs(rt, user["id"]),
-                               followup=followup, overrides=overrides, term_index=ds.term_index)
+                               followup=followup, overrides=overrides, term_index=ds.term_index,
+                               rules_mode=rt.settings.rules_mode)
     finally:
         rt.ask_lock.release()
 

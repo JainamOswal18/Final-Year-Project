@@ -6,6 +6,7 @@ every column field is an enum of the user's tagged columns.
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -15,7 +16,22 @@ from ..query.frame import INTENTS, QueryFrame, build_schema
 from .preprocess import Preprocessed
 from ..data.registry import Registry
 
-DEFAULT_MODEL = Path(__file__).resolve().parents[3] / "models" / "qwen2.5-0.5b-instruct-q4_k_m.gguf"
+MODELS_DIR = Path(__file__).resolve().parents[3] / "models"
+BASE_MODEL = MODELS_DIR / "qwen2.5-0.5b-instruct-q4_k_m.gguf"
+FINETUNED_MODEL = MODELS_DIR / "locallens-q4_k_m.gguf"  # the fine-tuned model (docs/FINETUNING.md); not in git, too large
+
+
+def default_model() -> Path:
+    """The fine-tuned model when it has been put in models/, else the original Qwen model."""
+    return FINETUNED_MODEL if FINETUNED_MODEL.exists() else BASE_MODEL
+
+
+def default_prompt_style(model_path: str | Path) -> str:
+    """The fine-tuned model was trained on the short prompt; the original model needs the full one."""
+    return "compact" if Path(model_path).name.startswith("locallens") else "full"
+
+
+DEFAULT_MODEL = default_model()
 
 SYSTEM = """You turn analytics questions into a JSON query frame. Output JSON only.
 
@@ -84,14 +100,47 @@ def _examples(reg: Registry) -> list[tuple[str, dict]]:
     return ex
 
 
+PROMPT_STYLES = ("full", "compact")
+
+
+def build_messages(pre: Preprocessed, reg: Registry, prev: QueryFrame | None = None, style: str = "full") -> list[dict]:
+    """The exact chat the model receives. One function for the app and for fine-tuning data, so they cannot drift.
+
+    full: system text, columns, 6 fixed examples and the closest verified examples.
+    compact: system text and columns only (a fine-tuned model does not need the examples; the prompt is much shorter)."""
+    if style not in PROMPT_STYLES:
+        raise ValueError(f"style must be one of {PROMPT_STYLES}")
+    about = f"\n\nAbout the data: {reg.description}" if reg.description else ""
+    system = f"{SYSTEM}{about}\n\nColumns:\n{describe_columns(reg)}"
+    messages = [{"role": "system", "content": system}]
+    if style == "full":
+        for q, frame in [*_examples(reg), *similar_examples(reg, pre.text)]:
+            messages += [{"role": "user", "content": q}, {"role": "assistant", "content": json.dumps(frame)}]
+    user = pre.text
+    if pre.date_hint:
+        h = pre.date_hint
+        user += f"\n[resolved date range: {h.start} to {h.end}" + (f", grain {h.grain}" if h.grain else "") + "]"
+    if pre.column_hints:
+        user += "\n[column hints: " + ", ".join(f"{p} = {c}" for p, c in pre.column_hints.items()) + "]"
+    if prev is not None:
+        user = (
+            f"Previous frame: {prev.model_dump_json()}\n"
+            f"If the new request only changes it (e.g. 'now by region', 'only 2024'), return the full updated frame; "
+            f"otherwise ignore the previous frame.\nNew request: {user}"
+        )
+    messages.append({"role": "user", "content": user})
+    return messages
+
+
 class GenerationTimeout(TimeoutError):
     """The model did not finish within its time budget (machine overloaded or generation stalled)."""
 
 
 class SLM:
     def __init__(self, model_path: str | Path = DEFAULT_MODEL, n_ctx: int = 2048, n_threads: int | None = None,
-                 time_budget_s: float = 30.0):
+                 time_budget_s: float = 30.0, prompt_style: str | None = None):
         self.time_budget_s = time_budget_s
+        self.prompt_style = prompt_style or os.environ.get("LOCALLENS_PROMPT_STYLE") or default_prompt_style(model_path)
         from llama_cpp import Llama  # imported lazily so the rest of the package works without it
 
         if not Path(model_path).exists():
@@ -119,24 +168,7 @@ class SLM:
         self, pre: Preprocessed, reg: Registry, prev: QueryFrame | None = None
     ) -> tuple[QueryFrame, str]:
         schema = build_schema(reg)
-        about = f"\n\nAbout the data: {reg.description}" if reg.description else ""
-        system = f"{SYSTEM}{about}\n\nColumns:\n{describe_columns(reg)}"
-        messages = [{"role": "system", "content": system}]
-        for q, frame in [*_examples(reg), *similar_examples(reg, pre.text)]:
-            messages += [{"role": "user", "content": q}, {"role": "assistant", "content": json.dumps(frame)}]
-        user = pre.text
-        if pre.date_hint:
-            h = pre.date_hint
-            user += f"\n[resolved date range: {h.start} to {h.end}" + (f", grain {h.grain}" if h.grain else "") + "]"
-        if pre.column_hints:
-            user += "\n[column hints: " + ", ".join(f"{p} = {c}" for p, c in pre.column_hints.items()) + "]"
-        if prev is not None:
-            user = (
-                f"Previous frame: {prev.model_dump_json()}\n"
-                f"If the new request only changes it (e.g. 'now by region', 'only 2024'), return the full updated frame; "
-                f"otherwise ignore the previous frame.\nNew request: {user}"
-            )
-        messages.append({"role": "user", "content": user})
+        messages = build_messages(pre, reg, prev, self.prompt_style)
         messages = self._fit(messages)
         stream = self.llm.create_chat_completion(
             messages=messages,

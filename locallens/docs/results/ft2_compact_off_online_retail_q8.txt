@@ -1,0 +1,21 @@
+model: models/finetuned/locallens-r2-q8_0.gguf | prompt: compact | rules: off
+matching by meaning: on
+Traceback (most recent call last):
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/eval/run_eval.py", line 224, in <module>
+    main()
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/eval/run_eval.py", line 126, in main
+    res = pipeline.ask(q, rg, con, slm, Session(), term_index=term_index, rules_mode=args.rules)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/src/locallens/core/pipeline.py", line 474, in ask
+    return _finish(res, frame, reg, con, session, question, prefs, t0, force=chart_word)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/src/locallens/core/pipeline.py", line 367, in _finish
+    res.df = label_dimension(engine.run(con, sql), frame)
+                             ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/src/locallens/data/engine.py", line 9, in run
+    return con.execute(sql).df()
+           ^^^^^^^^^^^^^^^^
+_duckdb.ConversionException: Conversion Error: Could not convert string 'United Kingdom' to DOUBLE
+
+LINE 1: ...iceDate" AS DATE) <= DATE '2010-12-31' AND "Customer ID" = 'United Kingdom' AND "Country" = 'United Kingdom' AND (...
+                                                                      ^

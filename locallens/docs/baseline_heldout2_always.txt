@@ -1,0 +1,20 @@
+model: default | rules: always
+matching by meaning: on
+
+40 questions
+  intent      90.0%  (36/40)
+  metric      95.0%  (38/40)
+  dimension   95.0%  (38/40)
+  time        95.0%  (38/40)
+  filters     95.0%  (38/40)
+  execution   95.0%  (38/40)
+  chart       92.5%  (37/40)
+  model alone (before rules): intent 60.0%, metric_column 100.0%, dimension 55.0%
+  asked a clarifying question instead of answering: 2 (counted as not answered above)
+  latency    p50 769 ms | p95 1901 ms | max 2055 ms
+
+Failures:
+ - sales in the West store region by category
+     asked: I wasn't sure which dimension you meant.
+ - overall sales for large orders in 2025
+     asked: I wasn't sure which time you meant.

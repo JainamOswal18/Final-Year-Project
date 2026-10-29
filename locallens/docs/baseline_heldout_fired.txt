@@ -1,0 +1,22 @@
+model: default | rules: fired
+matching by meaning: on
+
+50 questions
+  intent      92.0%  (46/50)
+  metric      98.0%  (49/50)
+  dimension   96.0%  (48/50)
+  time        98.0%  (49/50)
+  filters     98.0%  (49/50)
+  execution   96.0%  (48/50)
+  chart       94.0%  (47/50)
+  model alone (before rules): intent 60.0%, metric_column 98.0%, dimension 60.0%
+  asked a clarifying question instead of answering: 1 (counted as not answered above)
+  latency    p50 759 ms | p95 942 ms | max 3228 ms
+
+Failures:
+ - How do the regions stack up on revenue?
+     got {"intent":"summary","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"sales_amt","agg":"SUM"},"dimension":"store_region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "sales_amt", "agg": "SUM"}, "dimension": "store_region", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - average order value this year
+     asked: I wasn't sure which time you meant.

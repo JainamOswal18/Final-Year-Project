@@ -1,0 +1,15 @@
+model: default | prompt: compact | rules: always
+matching by meaning: on
+Traceback (most recent call last):
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/eval/run_eval.py", line 224, in <module>
+    main()
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/eval/run_eval.py", line 139, in main
+    gdf, gchart = gold_result(g, reg, con, extra[0] if extra and extra[0] else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/eval/run_eval.py", line 44, in gold_result
+    return df, build_spec(df, frame.intent, profile(df)).type
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jainam.oswal/Downloads/Final-Year-ft/locallens/src/locallens/viz/charts.py", line 128, in build_spec
+    "encoding": {"y": {"field": cats[0], "type": "nominal", "sort": sort},
+                                ~~~~^^^
+IndexError: list index out of range

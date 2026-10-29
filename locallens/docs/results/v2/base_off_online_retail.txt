@@ -1,0 +1,135 @@
+model: models/qwen2.5-0.5b-instruct-q4_k_m.gguf | prompt: full | rules: off
+matching by meaning: on
+
+55 cases: 55 answerable questions
+  intent      45.5%  (25/55)
+  metric      76.4%  (42/55)
+  dimension   80.0%  (44/55)
+  time        80.0%  (44/55)
+  filters     80.0%  (44/55)
+  execution   38.2%  (21/55)
+  chart       45.5%  (25/55)
+  model alone (before rules): intent 49.1%, metric_column 90.9%, dimension 58.2%
+  asked a clarifying question instead of answering: 2 (counted as not answered above)
+  latency    p50 708 ms | p95 755 ms | max 1619 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       38.2% [27-51]      27.3% [17-40]
+
+Failures:
+ - monthly revenue in 2010
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - revenue by month for 2011
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - quarterly revenue for 2010
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"quarter","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - how many units were sold each month in 2011
+     got {"intent":"summary","metric":{"column":"Quantity","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"Quantity","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - weekly revenue in November 2011
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"day","start":"2011-11-01","end":"2011-11-30"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"week","start":"2011-11-01","end":"2011-11-30"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - daily orders in the first week of March 2011
+     order count is a calculated total, so it has no spread of values. Try a trend or a comparison.
+ - yearly revenue
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"year","start":null,"end":null},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": null, "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - monthly average order value for 2011
+     got {"intent":"summary","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"avg_order_value","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "avg_order_value", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - monthly revenue by country in 2010 for France and Germany
+     got {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[{"column":"Country","op":"in","value":"France,Germany"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - monthly orders for the United Kingdom in 2010
+     A comparison needs something to group by.
+ - revenue trend over all months
+     A trend needs a date column.
+ - revenue by country
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":null,"time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": null, "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - units sold by country in 2011
+     got {"intent":"distribution","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":null,"start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - number of orders by country
+     got {"intent":"summary","metric":{"column":"order_count","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - average order value by country
+     average order value can't be split into shares. Try a comparison instead.
+ - average unit price by country
+     got {"intent":"proportion","metric":{"column":"Price","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Price","agg":"AVG"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Price", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - compare revenue between Germany and France
+     A comparison needs something to group by.
+ - revenue by product in 2011
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":null,"start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - revenue by market for 2010
+     got {"intent":"summary","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":null,"start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - quantity per customer
+     got {"intent":"distribution","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Customer ID", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - orders by customer in 2010
+     got {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":"Customer ID","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":"Customer ID","time":{"column":"InvoiceDate","grain":null,"start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "Customer ID", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - maximum unit price by country
+     got {"intent":"proportion","metric":{"column":"Price","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Price","agg":"MAX"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Price", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - units by product for the United Kingdom
+     got {"intent":"proportion","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[{"column":"Country","op":"=","value":"United Kingdom"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[{"column":"Country","op":"=","value":"United Kingdom"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - top 10 products by units sold in 2011
+     got {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":10,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":null,"start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":10,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [], "top_n": 10, "ambiguous": []}
+ - which country has the most orders
+     got {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"order_count","agg":"SUM"},"dimension":"Country","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - top 5 customers by revenue
+     got {"intent":"ranking","metric":{"column":"revenue","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"revenue","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Customer ID", "time": null, "filters": [], "top_n": 5, "ambiguous": []}
+ - best selling items in 2010
+     got {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":null,"start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - which product sold the most units
+     got {"intent":"proportion","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "proportion", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - country with the highest revenue last month
+     got {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":"day","start":"2011-11-01","end":"2011-11-30"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"revenue","agg":"SUM"},"dimension":"Country","time":{"column":"InvoiceDate","grain":null,"start":"2011-11-01","end":"2011-11-30"},"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Country", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - histogram of quantity per line
+     asked: I don't know what "line" refers to in this data. What should I group by?
+ - distribution of revenue per line in 2011
+     asked: I don't know what "line" refers to in this data. What should I group by?
+ - average unit price
+     A proportion needs something to group by.
+ - highest unit price
+     A proportion needs something to group by.
+ - orders from France in 2011
+     A comparison needs something to group by.
