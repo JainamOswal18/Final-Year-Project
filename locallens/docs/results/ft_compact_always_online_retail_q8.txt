@@ -1,0 +1,63 @@
+model: models/finetuned/locallens-colab-q8_0.gguf | prompt: compact | rules: always
+matching by meaning: on
+
+55 cases: 55 answerable questions
+  intent      92.7%  (51/55)
+  metric      90.9%  (50/55)
+  dimension   92.7%  (51/55)
+  time        90.9%  (50/55)
+  filters     92.7%  (51/55)
+  execution   76.4%  (42/55)
+  chart       92.7%  (51/55)
+  model alone (before rules): intent 96.4%, metric_column 94.5%, dimension 94.5%
+  asked a clarifying question instead of answering: 2 (counted as not answered above)
+  latency    p50 1241 ms | p95 1561 ms | max 1912 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       76.4% [64-86]      92.7% [83-97]
+
+Failures:
+ - daily orders in the first week of March 2011
+     got {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"day","start":"2011-03-01","end":"2011-03-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"trend","metric":{"column":"order_count","agg":"SUM"},"dimension":null,"time":{"column":"InvoiceDate","grain":"day","start":"2011-03-01","end":"2011-03-07"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "trend", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": null, "time": {"column": "InvoiceDate", "grain": "day", "start": "2011-03-01", "end": "2011-03-31"}, "filters": [], "top_n": null, "ambiguous": []}
+ - compare revenue between Germany and France
+     A comparison needs something to group by.
+ - revenue by product in 2011
+     got {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"revenue","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":null,"start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Description", "time": {"column": "InvoiceDate", "grain": null, "start": "2011-01-01", "end": "2011-12-31"}, "filters": [], "top_n": null, "ambiguous": []}
+ - quantity per customer
+     got {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Customer ID", "time": null, "filters": [], "top_n": null, "ambiguous": []}
+ - orders by customer in 2010
+     got {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":"Customer ID","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"order_count","agg":"SUM"},"dimension":"Customer ID","time":{"column":"InvoiceDate","grain":null,"start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "order_count", "agg": "SUM"}, "dimension": "Customer ID", "time": {"column": "InvoiceDate", "grain": null, "start": "2010-01-01", "end": "2010-12-31"}, "filters": [], "top_n": null, "ambiguous": []}
+ - units by product for the United Kingdom
+     got {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[{"column":"Country","op":"=","value":"United Kingdom"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"comparison","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[{"column":"Country","op":"=","value":"United Kingdom"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "comparison", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [{"column": "Country", "op": "=", "value": "United Kingdom"}], "top_n": null, "ambiguous": []}
+ - top 10 products by units sold in 2011
+     got {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":"month","start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":10,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":null,"start":"2011-01-01","end":"2011-12-31"},"filters":[],"top_n":10,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Description", "time": {"column": "InvoiceDate", "grain": null, "start": "2011-01-01", "end": "2011-12-31"}, "filters": [], "top_n": 10, "ambiguous": []}
+ - top 5 customers by revenue
+     got {"intent":"ranking","metric":{"column":"revenue","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"revenue","agg":"SUM"},"dimension":"Customer ID","time":null,"filters":[],"top_n":5,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Customer ID", "time": null, "filters": [], "top_n": 5, "ambiguous": []}
+ - best selling items in 2010
+     got {"intent":"ranking","metric":{"column":"revenue","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":"month","start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":{"column":"InvoiceDate","grain":null,"start":"2010-01-01","end":"2010-12-31"},"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "revenue", "agg": "SUM"}, "dimension": "Description", "time": {"column": "InvoiceDate", "grain": null, "start": "2010-01-01", "end": "2010-12-31"}, "filters": [], "top_n": 1, "ambiguous": []}
+ - which product sold the most units
+     got {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Quantity","agg":"SUM"},"dimension":"Description","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Quantity", "agg": "SUM"}, "dimension": "Description", "time": null, "filters": [], "top_n": 1, "ambiguous": []}
+ - histogram of quantity per line
+     asked: I don't know what "line" refers to in this data. What should I group by?
+ - distribution of revenue per line in 2011
+     asked: I don't know what "line" refers to in this data. What should I group by?
+ - highest unit price
+     A ranking needs something to group by.

@@ -51,6 +51,20 @@ direct test, with **no false matches on greetings and filler words**. On the thi
 first-run score from 73% to 83%. It is weak at telling domain words apart: "town", "outlet" and "pieces" were
 not matched, which is why the clarifying question matters more than the embeddings.
 
+## Fine-tuned model, measured (held-out 4 and two unseen schemas)
+
+Full report: `docs/FINETUNING.md`. Final-answer accuracy, original model against the fine-tuned model, test set frozen before training:
+
+| Set | Rules | Original | Fine-tuned |
+|---|---|---|---|
+| held-out 4 (233 cases) | `always` | 82.4% | 85.8% (0 lost, 8 gained, p = 0.008) |
+| held-out 4 | `fired` | 74.7% | 87.1% |
+| held-out 4 | `off` (model alone) | 50.2% | 83.7% |
+| Online Retail II (55) | `off` | 34.5% | 78.2% |
+| Wholesale customers (51) | `always` | 86.3% | **13.7%** (picks the generic metric when a question names two) |
+
+The model's own frame is right 95.3% of the time (original 38.0%). The fine-tuned model is opt-in, not the default, until the Wholesale failure is fixed.
+
 ## Known limits
 
 * The data is synthetic and the questions were written by the same team, in English only.
@@ -61,8 +75,10 @@ not matched, which is why the clarifying question matters more than the embeddin
 ## How to run
 
 ```
-python eval/run_eval.py --set gold|heldout|heldout2|heldout3 [--show-failures] [--no-embeddings]
-                        [--rules always|fired|off] [--model path/to/other.gguf]
+python eval/run_eval.py --set gold|heldout|heldout2|heldout3|heldout4|online_retail|wholesale [--show-failures] [--no-embeddings]
+                        [--rules always|fired|off] [--model path/to/other.gguf] [--prompt-style full|compact]
+                        [--out run.jsonl] [--no-sequences]
+python eval/compare.py a.jsonl b.jsonl      # paired McNemar test between two runs
 ```
 
 * `--rules always` (default, same as the app): keyword rules decide the question type and aggregation, and their

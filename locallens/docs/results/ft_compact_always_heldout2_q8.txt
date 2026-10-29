@@ -1,0 +1,19 @@
+model: models/finetuned/locallens-colab-q8_0.gguf | prompt: compact | rules: always
+matching by meaning: on
+
+40 cases: 40 answerable questions
+  intent      95.0%  (38/40)
+  metric      97.5%  (39/40)
+  dimension  100.0%  (40/40)
+  time       100.0%  (40/40)
+  filters    100.0%  (40/40)
+  execution   97.5%  (39/40)
+  chart       97.5%  (39/40)
+  model alone (before rules): intent 97.5%, metric_column 97.5%, dimension 100.0%
+  latency    p50 893 ms | p95 1577 ms | max 2209 ms
+
+Failures:
+ - distribution of sales amounts for corporate customers
+     got {"intent":"distribution","metric":{"column":"quantity","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"cust_seg","op":"=","value":"Corporate"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"distribution","metric":{"column":"sales_amt","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"cust_seg","op":"=","value":"Corporate"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "distribution", "metric": {"column": "quantity", "agg": "SUM"}, "dimension": null, "time": null, "filters": [{"column": "cust_seg", "op": "=", "value": "Corporate"}], "top_n": null, "ambiguous": []}

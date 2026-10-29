@@ -1,0 +1,8 @@
+== base Q4_K_M, full prompt
+  latency    p50 786 ms | p95 1590 ms | max 2207 ms
+== fine-tuned Q8_0, compact prompt
+  latency    p50 906 ms | p95 1518 ms | max 2353 ms
+== fine-tuned Q4_K_M, compact prompt
+  latency    p50 918 ms | p95 1691 ms | max 2151 ms
+== fine-tuned Q8_0, full prompt
+  latency    p50 977 ms | p95 1628 ms | max 2951 ms
