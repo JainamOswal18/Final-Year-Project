@@ -1,0 +1,31 @@
+model: models/finetuned/locallens-r2-q8_0.gguf | prompt: compact | rules: off
+matching by meaning: on
+
+51 cases: 51 answerable questions
+  intent      96.1%  (49/51)
+  metric      92.2%  (47/51)
+  dimension   96.1%  (49/51)
+  time        96.1%  (49/51)
+  filters     96.1%  (49/51)
+  execution   92.2%  (47/51)
+  chart       96.1%  (49/51)
+  model alone (before rules): intent 100.0%, metric_column 94.1%, dimension 98.0%
+  latency    p50 534 ms | p95 770 ms | max 844 ms
+
+  execution accuracy (95% interval) | model alone: intent+metric+dimension right
+  all answerable       92.2% [81-97]      94.1% [84-98]
+  vocab                75.0% [30-95]      100.0% [51-100]    n=4
+
+Failures:
+ - total detergents and paper spend
+     Expected a number, got 'detergents'
+ - detergents and paper spend by channel
+     Expected a number, got 'detergents'
+ - total detergents and paper spend in the Other region
+     got {"intent":"summary","metric":{"column":"total_spend","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"Region","op":"=","value":"Other"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"summary","metric":{"column":"Detergents_Paper","agg":"SUM"},"dimension":null,"time":null,"filters":[{"column":"Region","op":"=","value":"Other"}],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "summary", "metric": {"column": "total_spend", "agg": "SUM"}, "dimension": "Region", "filters": [{"column": "Channel", "op": "=", "value": "Other"}], "top_n": null, "ambiguous": []}
+ - top region for groceries
+     got {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":null,"order":"desc","ambiguous":[],"rules":[]}
+     want {"intent":"ranking","metric":{"column":"Grocery","agg":"SUM"},"dimension":"Region","time":null,"filters":[],"top_n":1,"order":"desc","ambiguous":[],"rules":[]}
+     model {"intent": "ranking", "metric": {"column": "Grocery", "agg": "SUM"}, "dimension": "Region", "filters": [], "top_n": null, "ambiguous": []}

@@ -1,0 +1,51 @@
+{"q": "total fresh spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 765.778709001097}
+{"q": "total milk spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 519.1584160002094}
+{"q": "total grocery spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 519.0257079993899}
+{"q": "total frozen spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 522.5903749997087}
+{"q": "total detergents and paper spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 527.7479579999635}
+{"q": "total delicatessen spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 525.4201249990729}
+{"q": "fresh spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 533.3359169999312}
+{"q": "milk spend by region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 533.6920830013696}
+{"q": "grocery spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 536.3280830006261}
+{"q": "frozen spend by region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 533.87875000044}
+{"q": "detergents and paper spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 566.6284170001745}
+{"q": "delicatessen spend by region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 539.0551670006971}
+{"q": "average fresh spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 544.7669590012083}
+{"q": "average grocery spend per region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 545.3665000004548}
+{"q": "total spend by channel", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 532.034666999607}
+{"q": "total spend by region", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 530.9925000001385}
+{"q": "average milk spend for Retail customers by region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 753.2282919983118}
+{"q": "fresh spend by region for Horeca customers", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 774.8026669996761}
+{"q": "maximum frozen spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 536.7258340011176}
+{"q": "minimum grocery spend by region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 536.4402089999203}
+{"q": "which region spends the most on milk", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 766.8550830003369}
+{"q": "which channel spends the most on grocery", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 790.3001249997033}
+{"q": "rank regions by total spend", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 545.4581249996409}
+{"q": "rank channels by fresh spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 534.833499999877}
+{"q": "which region spends the least on frozen food", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 754.7427499994228}
+{"q": "share of fresh spend by region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 552.8562919989781}
+{"q": "share of grocery spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 544.5176249995711}
+{"q": "what percentage of milk spend comes from each region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 549.7716250010853}
+{"q": "share of total spend by region", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 548.6100410016661}
+{"q": "share of frozen spend by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 552.5579999994079}
+{"q": "distribution of fresh spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": null}
+{"q": "histogram of milk spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": null}
+{"q": "distribution of grocery spend for Retail customers", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": null}
+{"q": "spread of frozen spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": null}
+{"q": "total spend for Lisbon", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 755.2485830001388}
+{"q": "fresh spend in Oporto", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 738.5578749999695}
+{"q": "grocery spend for Horeca customers", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 761.4764159989136}
+{"q": "average fresh spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 534.1548749984213}
+{"q": "average total spend", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 533.8441249987227}
+{"q": "highest milk spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 523.9202080010728}
+{"q": "lowest delicatessen spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 543.1772499996441}
+{"q": "frozen spend for Retail customers in Lisbon", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 763.5291669994331}
+{"q": "total detergents and paper spend in the Other region", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 738.0798340000183}
+{"q": "dairy spend by area", "kind": "question", "tags": ["vocab"], "ok": false, "asked": false, "raw_ok": false, "ms": 533.996959000433}
+{"q": "cleaning spend by customer type", "kind": "question", "tags": ["vocab"], "ok": false, "asked": false, "raw_ok": false, "ms": 542.1446670006844}
+{"q": "deli spend by region", "kind": "question", "tags": ["vocab"], "ok": false, "asked": false, "raw_ok": false, "ms": 542.6413330005744}
+{"q": "top region for groceries", "kind": "question", "tags": ["vocab"], "ok": true, "asked": false, "raw_ok": false, "ms": 760.8531250007218}
+{"q": "fresh spend for Lisbon by channel", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 777.542750000066}
+{"q": "average frozen spend in Oporto", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 754.9672499990265}
+{"q": "rank regions by delicatessen spend", "kind": "question", "tags": [], "ok": false, "asked": false, "raw_ok": false, "ms": 539.7544580009708}
+{"q": "overall spend of Horeca customers", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 759.3794170006731}

@@ -5,6 +5,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from ..nlu.slm import default_model
+
 ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -17,7 +19,7 @@ class Settings:
     host: str = field(default_factory=lambda: _env("HOST", "127.0.0.1"))
     port: int = field(default_factory=lambda: int(_env("PORT", "8000")))
     data_dir: Path = field(default_factory=lambda: Path(_env("DATA_DIR", str(ROOT / "data" / "server"))))
-    model_path: Path = field(default_factory=lambda: Path(_env("MODEL_PATH", str(ROOT / "models" / "qwen2.5-0.5b-instruct-q4_k_m.gguf"))))
+    model_path: Path = field(default_factory=lambda: Path(_env("MODEL_PATH", str(default_model()))))
     embed_model_path: Path = field(default_factory=lambda: Path(_env("EMBED_MODEL_PATH", str(ROOT / "models" / "bge-small-en-v1.5-q8_0.gguf"))))
     use_embeddings: bool = field(default_factory=lambda: _env("EMBEDDINGS", "1") == "1")
     web_dir: Path = field(default_factory=lambda: Path(_env("WEB_DIR", str(ROOT / "web" / "dist"))))

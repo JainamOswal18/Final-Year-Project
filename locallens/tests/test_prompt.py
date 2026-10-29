@@ -27,3 +27,22 @@ def test_previous_frame_is_part_of_the_question(sreg):
 def test_unknown_style_is_refused(sreg):
     with pytest.raises(ValueError):
         build_messages(preprocess("total sales", sreg, TODAY), sreg, style="tiny")
+
+
+def test_prompt_style_follows_the_model(monkeypatch):
+    from pathlib import Path
+
+    from locallens.nlu.slm import default_prompt_style
+
+    assert default_prompt_style(Path("models/locallens-q4_k_m.gguf")) == "compact"
+    assert default_prompt_style(Path("models/qwen2.5-0.5b-instruct-q4_k_m.gguf")) == "full"
+
+
+def test_default_model_prefers_the_fine_tuned_file(tmp_path, monkeypatch):
+    from locallens.nlu import slm
+
+    tuned = tmp_path / "locallens-q4_k_m.gguf"
+    monkeypatch.setattr(slm, "FINETUNED_MODEL", tuned)
+    assert slm.default_model() == slm.BASE_MODEL
+    tuned.write_bytes(b"x")
+    assert slm.default_model() == tuned

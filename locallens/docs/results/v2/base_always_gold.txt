@@ -1,0 +1,15 @@
+model: models/qwen2.5-0.5b-instruct-q4_k_m.gguf | prompt: full | rules: always
+matching by meaning: on
+
+48 cases: 48 answerable questions
+  intent     100.0%  (48/48)
+  metric     100.0%  (48/48)
+  dimension  100.0%  (48/48)
+  time        97.9%  (47/48)
+  filters    100.0%  (48/48)
+  execution  100.0%  (48/48)
+  chart      100.0%  (48/48)
+  model alone (before rules): intent 75.0%, metric_column 100.0%, dimension 68.8%
+  latency    p50 710 ms | p95 819 ms | max 1706 ms
+
+Failures:

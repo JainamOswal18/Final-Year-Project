@@ -67,8 +67,8 @@ Everything is stored under `data/server/` — **back that folder up**; it holds 
 |---|---|---|
 | `LOCALLENS_HOST` / `LOCALLENS_PORT` | `127.0.0.1` / `8000` | where to listen |
 | `LOCALLENS_DATA_DIR` | `data/server` | database, uploads, logs |
-| `LOCALLENS_MODEL_PATH` | `models/qwen2.5-0.5b-instruct-q4_k_m.gguf` | language model |
-| `LOCALLENS_PROMPT_STYLE` | `full` | `compact` leaves out the fixed examples (for the fine-tuned model; the original model needs `full`) |
+| `LOCALLENS_MODEL_PATH` | `models/locallens-q4_k_m.gguf` if present, else `models/qwen2.5-0.5b-instruct-q4_k_m.gguf` | language model (the first is the fine-tuned one, see `docs/FINETUNING.md`) |
+| `LOCALLENS_PROMPT_STYLE` | `compact` for the fine-tuned model, `full` for the original | `compact` leaves out the fixed examples (the original model needs `full`) |
 | `LOCALLENS_RULES` | `always` | `fired`: the model decides the question type when no keyword fires (for the fine-tuned model) |
 | `LOCALLENS_EMBEDDINGS` | `1` | match unknown words by meaning (uses the 35 MB model if present) |
 | `LOCALLENS_N_THREADS` | automatic | CPU threads for the model; use the number of fast cores |

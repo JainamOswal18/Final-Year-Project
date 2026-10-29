@@ -53,17 +53,19 @@ not matched, which is why the clarifying question matters more than the embeddin
 
 ## Fine-tuned model, measured (held-out 4 and two unseen schemas)
 
-Full report: `docs/FINETUNING.md`. Final-answer accuracy, original model against the fine-tuned model, test set frozen before training:
+Full report: `docs/FINETUNING.md`; raw runs in `docs/results/v2/`. Final-answer accuracy, all three run through the same pipeline. Held-out 4 was frozen before training.
+Round 2 is the default model.
 
-| Set | Rules | Original | Fine-tuned |
-|---|---|---|---|
-| held-out 4 (233 cases) | `always` | 82.4% | 85.8% (0 lost, 8 gained, p = 0.008) |
-| held-out 4 | `fired` | 74.7% | 87.1% |
-| held-out 4 | `off` (model alone) | 50.2% | 83.7% |
-| Online Retail II (55) | `off` | 34.5% | 78.2% |
-| Wholesale customers (51) | `always` | 86.3% | **13.7%** (picks the generic metric when a question names two) |
+| Set | Rules | Original | Round 1 | **Round 2** |
+|---|---|---|---|---|
+| held-out 4 (233 cases) | `always` | 84.1% | 85.8% | 84.1% (same as the original, p = 1.0) |
+| held-out 4 | `fired` | 77.7% | 87.1% | 85.8% (vs original p = 0.0005) |
+| held-out 4 | `off` (model alone) | 50.2% | 83.3% | 80.3% (vs original p < 0.0001) |
+| Online Retail II (55) | `always` / `off` | 74.5% / 38.2% | 76.4% / 78.2% | 76.4% / 76.4% |
+| Wholesale customers (51) | `always` / `off` | 86.3% / 45.1% | **13.7%** / 15.7% | 88.2% / 92.2% |
 
-The model's own frame is right 95.3% of the time (original 38.0%). The fine-tuned model is opt-in, not the default, until the Wholesale failure is fixed.
+Round 1 broke Wholesale (it picked the generic metric when a question named two); round 2's data covers that case. Wholesale is therefore a regression check, not an unseen score, for round 2.
+The honest summary: with the rules on, the fine-tuned model is as accurate as the original; its gain is what the model does by itself and a shorter prompt. It is not faster.
 
 ## Known limits
 

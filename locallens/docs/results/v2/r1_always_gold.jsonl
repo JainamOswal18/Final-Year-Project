@@ -1,0 +1,48 @@
+{"q": "Show monthly sales for 2024", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1679.3980830007058}
+{"q": "Show monthly sales for 2024 by region", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1246.1250830001518}
+{"q": "Monthly profit in 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1229.1114589988865}
+{"q": "How did revenue change over time in 2023", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1231.313250000312}
+{"q": "Quarterly sales for 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1219.8245419986051}
+{"q": "Show monthly revenue for Q3 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1223.058209001465}
+{"q": "Monthly sales trend by category in 2024", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1258.5455419994105}
+{"q": "Yearly profit", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 829.6895000003133}
+{"q": "Compare sales by category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 600.1190839997435}
+{"q": "Compare profit across regions", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 603.5011660005694}
+{"q": "Sales by customer segment", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 609.3783329997677}
+{"q": "Compare revenue by city in 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1235.7750419996592}
+{"q": "Average sales per category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 610.2209170003334}
+{"q": "Compare quantity by sub category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 599.6051669990266}
+{"q": "Compare profit by store", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 597.913541001617}
+{"q": "Sales by category for consumer customers", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 822.7571250008623}
+{"q": "Compare profit across categories last year", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1225.3104999999778}
+{"q": "Top 10 products by revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 641.5004999998928}
+{"q": "Top 5 products by profit", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 609.9721669997962}
+{"q": "Top 3 sub categories by profit for consumer segment in 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1480.0376249986584}
+{"q": "Which city has the highest sales", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 629.6902499998396}
+{"q": "Rank stores by revenue", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 615.1554999996733}
+{"q": "Top 5 categories by quantity in 2024", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1231.478125000649}
+{"q": "What share of sales comes from each category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 624.4052500005637}
+{"q": "Proportion of profit by customer segment", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 611.1417080010142}
+{"q": "What percent of revenue is from each region in 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1258.3819170013157}
+{"q": "Share of quantity by sub category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 612.6838330001192}
+{"q": "What is the distribution of order sales", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 586.3957080000546}
+{"q": "Distribution of profit", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 575.0959590004641}
+{"q": "Show the spread of quantity", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 574.4327909997082}
+{"q": "Total revenue last year", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1203.8590840002144}
+{"q": "Total sales", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 581.944833000307}
+{"q": "What was the total profit in 2025", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1207.2177909994934}
+{"q": "Average order sales", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 593.9137910008867}
+{"q": "Total sales for corporate customers", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 805.5896249989019}
+{"q": "How many units did we sell in 2024", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1214.6392079994257}
+{"q": "compare revnue by categry", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 602.2229999998672}
+{"q": "show montly turnover for 2024", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1233.9069169993309}
+{"q": "top 5 items by earnings", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 615.1214170004096}
+{"q": "total margin for furniture", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 801.8109999993612}
+{"q": "profit margin by category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 605.1490419995389}
+{"q": "average order value by store", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 633.8350830010313}
+{"q": "monthly profit margin for 2024", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 1237.769749999643}
+{"q": "number of orders by region", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 618.1122080015484}
+{"q": "top 5 products by order count", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 632.918334000351}
+{"q": "share of orders by category", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 617.7513339989673}
+{"q": "what is the aov for corporate customers", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 839.1860000010638}
+{"q": "sales by order size", "kind": "question", "tags": [], "ok": true, "asked": false, "raw_ok": true, "ms": 624.172499999986}

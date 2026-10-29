@@ -16,7 +16,22 @@ from ..query.frame import INTENTS, QueryFrame, build_schema
 from .preprocess import Preprocessed
 from ..data.registry import Registry
 
-DEFAULT_MODEL = Path(__file__).resolve().parents[3] / "models" / "qwen2.5-0.5b-instruct-q4_k_m.gguf"
+MODELS_DIR = Path(__file__).resolve().parents[3] / "models"
+BASE_MODEL = MODELS_DIR / "qwen2.5-0.5b-instruct-q4_k_m.gguf"
+FINETUNED_MODEL = MODELS_DIR / "locallens-q4_k_m.gguf"  # the fine-tuned model (docs/FINETUNING.md); not in git, too large
+
+
+def default_model() -> Path:
+    """The fine-tuned model when it has been put in models/, else the original Qwen model."""
+    return FINETUNED_MODEL if FINETUNED_MODEL.exists() else BASE_MODEL
+
+
+def default_prompt_style(model_path: str | Path) -> str:
+    """The fine-tuned model was trained on the short prompt; the original model needs the full one."""
+    return "compact" if Path(model_path).name.startswith("locallens") else "full"
+
+
+DEFAULT_MODEL = default_model()
 
 SYSTEM = """You turn analytics questions into a JSON query frame. Output JSON only.
 
@@ -125,7 +140,7 @@ class SLM:
     def __init__(self, model_path: str | Path = DEFAULT_MODEL, n_ctx: int = 2048, n_threads: int | None = None,
                  time_budget_s: float = 30.0, prompt_style: str | None = None):
         self.time_budget_s = time_budget_s
-        self.prompt_style = prompt_style or os.environ.get("LOCALLENS_PROMPT_STYLE", "full")
+        self.prompt_style = prompt_style or os.environ.get("LOCALLENS_PROMPT_STYLE") or default_prompt_style(model_path)
         from llama_cpp import Llama  # imported lazily so the rest of the package works without it
 
         if not Path(model_path).exists():
