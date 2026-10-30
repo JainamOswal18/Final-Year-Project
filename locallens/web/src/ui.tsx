@@ -14,13 +14,13 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 }
 
 export function Seg<T extends string>({ value, options, onChange, label, cls }: {
-  value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; label: string; cls?: (v: T) => string;
+  value: T; options: { value: T; label: string; title?: string }[]; onChange: (v: T) => void; label: string; cls?: (v: T) => string;
 }) {
   return (
     <div className="seg" role="group" aria-label={label}>
       {options.map((o) => (
         <button type="button" key={o.value} className={`${value === o.value ? "on" : ""} ${cls?.(o.value) ?? ""}`}
-          aria-pressed={value === o.value} onClick={() => onChange(o.value)}>{o.label}</button>
+          aria-pressed={value === o.value} title={o.title} onClick={() => onChange(o.value)}>{o.label}</button>
       ))}
     </div>
   );
@@ -104,6 +104,8 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): { data: T | 
 }
 
 export const Icon = {
+  info: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 7.5v.01" /></svg>,
+  compass: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" /></svg>,
   search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l5 5" /></svg>,
   send: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>,
   plus: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,

@@ -39,7 +39,15 @@ function NewDatasetDialog({ open, onClose }: { open: boolean; onClose: () => voi
         <div className="row between small" key={i}><span>{f.name} <span className="faint">{(f.size / 1024 / 1024).toFixed(1)} MB</span></span>
           <button className="btn ghost sm" onClick={() => setFiles(files.filter((_, j) => j !== i))}>Remove</button></div>))}</div>}
       {error && <Callout kind="bad">{error}</Callout>}
-      <p className="small muted">Files are stored on this server only. Next you will check which columns are metrics, categories and dates.</p>
+      <div className="callout small stack-sm" style={{ display: "grid" }}>
+        <strong>Before you upload</strong>
+        <ul className="guide-list">
+          <li>Put the column names in the <strong>first row</strong>, one row per sale, order or event.</li>
+          <li>Have more than one file? Upload them together, for example <code>orders.csv</code> and <code>customers.csv</code>. You connect them next.</li>
+          <li>Leave the name empty to use the file name.</li>
+        </ul>
+      </div>
+      <p className="small muted">Files are stored on this server only. Next you will check which columns are metrics, categories and dates; a guide on that page explains how.</p>
     </Dialog>
   );
 }
@@ -59,8 +67,8 @@ export default function DatasetsPage() {
     <div className="page">
       <div className="page-head">
         <div><h1>Datasets</h1><p>Pick a dataset to ask questions, or add your own data.</p></div>
-        <div className="row"><button className="btn" onClick={() => void demo()} disabled={busy}>{busy ? <Spinner /> : null} Try the retail demo</button>
-          <button className="btn primary" onClick={() => setOpen(true)}>{Icon.plus} New dataset</button></div>
+        <div className="row"><button className="btn" data-tour="demo" onClick={() => void demo()} disabled={busy}>{busy ? <Spinner /> : null} Try the retail demo</button>
+          <button className="btn primary" data-tour="new-dataset" onClick={() => setOpen(true)}>{Icon.plus} New dataset</button></div>
       </div>
       {loading ? <Spinner /> : list.length === 0 ? (
         <div className="card empty">

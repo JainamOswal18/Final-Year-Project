@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 DEFAULT_PATH = Path(__file__).resolve().parents[3] / "prefs.json"
-DEFAULTS: dict = {"chart_overrides": {}, "sort": "desc", "default_agg": "SUM"}
+DEFAULTS: dict = {"chart_overrides": {}, "sort": "desc", "default_agg": "SUM", "tour_done": False}
 
 
 def load(path: Path = DEFAULT_PATH) -> dict:

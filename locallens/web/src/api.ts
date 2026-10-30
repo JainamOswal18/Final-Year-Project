@@ -75,5 +75,6 @@ export const api = {
   exportUrl: (messageId: string, kind: string) => `/api/messages/${messageId}/export/${kind}`,
 
   prefs: () => get<Prefs>("/api/prefs"),
+  setTour: (done: boolean) => post<Prefs>("/api/prefs/tour", { done }),
   savePrefs: (p: { sort: string; chart_overrides: Record<string, string>; default_agg: string }) => put<Prefs>("/api/prefs", p),
 };

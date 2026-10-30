@@ -556,3 +556,33 @@ def test_chart_request_over_http_and_its_export(admin, demo_id):
     assert r["response"]["chart"]["reason"] == "you asked for a pie chart"
     export = admin.get(f"/api/messages/{r['message_id']}/export/powerbi")
     assert export.status_code == 200                                                      # exported as the chart the user chose
+
+
+def test_tour_flag_is_per_user_and_survives_saving_preferences(admin, demo_id):
+    assert admin.get("/api/prefs").json()["tour_done"] is False                           # a new user is shown the tour
+    assert admin.post("/api/prefs/tour", json={"done": True}, headers=H).json()["tour_done"] is True
+    saved = admin.put("/api/prefs", json={"sort": "asc"}, headers=H).json()
+    assert saved["sort"] == "asc" and saved["tour_done"] is True                          # saving chart settings keeps it
+    assert admin.post("/api/prefs/tour", json={"done": False}, headers=H).json()["tour_done"] is False
+    assert admin.get("/api/prefs").json()["sort"] == "asc"                                # and the tour call keeps the settings
+    assert admin.post("/api/prefs/tour", json={"done": "maybe"}, headers=H).status_code == 422
+
+
+def test_example_formulas_shown_in_the_help_panels_are_valid(admin, demo_id):
+    """The Definitions page teaches with these; if one stopped working the help would mislead people."""
+    cols = {c["flat_name"] for c in admin.get(f"/api/datasets/{demo_id}").json()["registry"]["columns"] if c["flat_name"]}
+    assert {"sales_amt", "profit", "quantity", "category"} <= cols, cols
+    ok = [("measure", "SUM(profit) / NULLIF(SUM(sales_amt), 0)"),
+          ("measure", "SUM(sales_amt) / NULLIF(SUM(quantity), 0)"),
+          ("measure", "AVG(sales_amt)"),
+          ("measure", "SUM(sales_amt)"),
+          ("measure", "MAX(sales_amt)"),
+          ("measure", "MIN(sales_amt)"),
+          ("column", "CASE WHEN sales_amt >= 1000 THEN 'Large' ELSE 'Small' END"),
+          ("column", "CASE WHEN sales_amt >= 5000 THEN 'Large' WHEN sales_amt >= 1000 THEN 'Medium' ELSE 'Small' END"),
+          ("rule", "sales_amt >= 1000"),
+          ("rule", "category IN ('Furniture', 'Technology')"),
+          ("rule", "category <> 'Furniture'")]
+    for kind, expr in ok:
+        r = admin.post(f"/api/datasets/{demo_id}/check-expression", json={"kind": kind, "expression": expr}, headers=H).json()
+        assert r["ok"], (kind, expr, r)

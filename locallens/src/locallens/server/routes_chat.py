@@ -44,6 +44,10 @@ class FeedbackIn(BaseModel):
     note: str = Field(default="", max_length=500)
 
 
+class TourIn(BaseModel):
+    done: bool
+
+
 class PrefsIn(BaseModel):
     sort: str = "desc"
     chart_overrides: dict[str, str] = Field(default_factory=dict)
@@ -69,7 +73,8 @@ def load_prefs(rt: Runtime, user_id: int) -> dict:
 def get_prefs(user=Depends(current_user), rt: Runtime = Depends(runtime)):
     p = load_prefs(rt, user["id"])
     return {"sort": p["sort"], "chart_overrides": p["chart_overrides"], "default_agg": p["default_agg"],
-            "default_aggs": list(DEFAULT_AGGS), "choices": {k: sorted(v) for k, v in CHART_CHOICES.items()}}
+            "default_aggs": list(DEFAULT_AGGS), "choices": {k: sorted(v) for k, v in CHART_CHOICES.items()},
+            "tour_done": bool(p.get("tour_done"))}
 
 
 @router.put("/prefs")
@@ -81,10 +86,22 @@ def put_prefs(body: PrefsIn, user=Depends(current_user), rt: Runtime = Depends(r
     for intent, chart in body.chart_overrides.items():
         if chart not in CHART_CHOICES.get(intent, set()):
             raise HTTPException(422, f"{chart!r} is not available for {intent}.")
+    keep_tour = bool(load_prefs(rt, user["id"]).get("tour_done"))  # saving chart settings must not bring the tour back
+    _store_prefs(rt, user["id"], {**body.model_dump(), "tour_done": keep_tour})
+    return get_prefs(user, rt)
+
+
+@router.post("/prefs/tour")
+def set_tour(body: TourIn, user=Depends(current_user), rt: Runtime = Depends(runtime)):
+    """Remember that the first-visit tour was finished or skipped (done=true), or ask to see it again (done=false)."""
+    _store_prefs(rt, user["id"], {**load_prefs(rt, user["id"]), "tour_done": body.done})
+    return get_prefs(user, rt)
+
+
+def _store_prefs(rt: Runtime, user_id: int, prefs: dict) -> None:
     with rt.db.tx() as c:
         c.execute("INSERT INTO prefs (user_id, json) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET json = excluded.json",
-                  (user["id"], json.dumps(body.model_dump())))
-    return get_prefs(user, rt)
+                  (user_id, json.dumps(prefs)))
 
 
 # ---- conversations ---------------------------------------------------------------------

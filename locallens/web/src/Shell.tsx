@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation, useMatch, useNavigate } from "react-route
 import { api } from "./api";
 import { DatasetsProvider, loadTheme, saveTheme, useAuth, useDatasets, type ThemePref } from "./auth";
 import { Icon } from "./ui";
+import { TourProvider, useTour } from "./tour/Tour";
 import type { ConversationSummary } from "./types";
 
 function Brand() {
@@ -22,6 +23,7 @@ function ThemeToggle() {
 
 function Sidebar() {
   const { user, signOut } = useAuth();
+  const tour = useTour();
   const { list } = useDatasets();
   const nav = useNavigate();
   const loc = useLocation();
@@ -38,7 +40,7 @@ function Sidebar() {
     <aside className="sidebar">
       <Brand />
       <nav className="nav" aria-label="Datasets">
-        <NavLink to="/datasets" end>{Icon.grid} Datasets</NavLink>
+        <NavLink to="/datasets" end data-tour="nav-datasets">{Icon.grid} Datasets</NavLink>
       </nav>
       {id && current && (
         <>
@@ -49,11 +51,11 @@ function Sidebar() {
             </select>
           </div>
           <nav className="nav" aria-label="Dataset">
-            <NavLink to={`/d/${id}/ask`}>{Icon.chat} Ask</NavLink>
-            <NavLink to={`/d/${id}/data`}>{Icon.table} Data</NavLink>
+            <NavLink to={`/d/${id}/ask`} data-tour="nav-ask">{Icon.chat} Ask</NavLink>
+            <NavLink to={`/d/${id}/data`} data-tour="nav-data">{Icon.table} Data</NavLink>
             {current.can_edit && <>
-              <NavLink to={`/d/${id}/columns`}>{Icon.tag} Columns</NavLink>
-              <NavLink to={`/d/${id}/definitions`}>{Icon.fn} Definitions</NavLink>
+              <NavLink to={`/d/${id}/columns`} data-tour="nav-columns">{Icon.tag} Columns</NavLink>
+              <NavLink to={`/d/${id}/definitions`} data-tour="nav-definitions">{Icon.fn} Definitions</NavLink>
               <NavLink to={`/d/${id}/examples`}>{Icon.check} Examples</NavLink>
               <NavLink to={`/d/${id}/settings`}>{Icon.gear} Dataset settings</NavLink>
             </>}
@@ -67,9 +69,10 @@ function Sidebar() {
       )}
       <div className="sidebar-foot">
         <nav className="nav" aria-label="Account">
-          <NavLink to="/settings">{Icon.gear} Preferences</NavLink>
-          {user?.role === "admin" && <NavLink to="/admin">{Icon.users} Administration</NavLink>}
+          <NavLink to="/settings" data-tour="nav-prefs">{Icon.gear} Preferences</NavLink>
+          {user?.role === "admin" && <NavLink to="/admin" data-tour="nav-admin">{Icon.users} Administration</NavLink>}
           <ThemeToggle />
+          <button onClick={tour.start} data-tour="tour-again" title="A short walk through the app, with examples">{Icon.compass} Take the tour</button>
         </nav>
         <div className="user-pill">
           <span className="avatar" aria-hidden="true">{user?.username.slice(0, 1).toUpperCase()}</span>
@@ -84,10 +87,12 @@ function Sidebar() {
 export default function Shell() {
   return (
     <DatasetsProvider>
-      <div className="shell">
-        <Sidebar />
-        <main className="main" id="main"><Outlet /></main>
-      </div>
+      <TourProvider>
+        <div className="shell">
+          <Sidebar />
+          <main className="main" id="main"><Outlet /></main>
+        </div>
+      </TourProvider>
     </DatasetsProvider>
   );
 }

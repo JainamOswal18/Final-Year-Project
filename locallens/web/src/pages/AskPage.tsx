@@ -4,6 +4,7 @@ import { api } from "../api";
 import { AnswerView } from "../AnswerView";
 import { LabelProvider, makeLabeler } from "../labels";
 import type { Answer, Completion, Message } from "../types";
+import { HowTo, Recipes } from "../help";
 import { Callout, Icon, Spinner, useAsync } from "../ui";
 import { useDataset } from "./DatasetLoader";
 
@@ -97,6 +98,21 @@ export default function AskPage() {
               <h2>What would you like to know?</h2>
               <p className="muted">Ask about {detail.registry.measures.length ? "your metrics, " : ""}totals, trends, comparisons and rankings. The answer comes with a chart and a plain explanation of how it was read.</p>
               {starters.length > 0 && <div className="chips">{starters.map((s) => <button key={s} className="chip" onClick={() => void ask(s)}>{s}</button>)}</div>}
+              <HowTo id="ask" title="Ways to phrase a question">
+                <Recipes head={["You want", "Try saying"]} rows={[
+                  ["A total", <em key="a">total sales</em>],
+                  ["Groups side by side", <em key="b">sales by region</em>],
+                  ["A trend", <em key="c">monthly sales for 2024</em>],
+                  ["The best or worst", <em key="d">top 5 products by quantity</em>],
+                  ["Each group’s share", <em key="e">share of sales by category</em>],
+                  ["A time window", <em key="f">sales last quarter</em>],
+                ]} />
+                <ul className="guide-list">
+                  <li>Start typing and press <strong>Tab</strong> to finish a word with one of your own column names or values.</li>
+                  <li>Follow up in the same chat with a short change, such as <em>now only East</em>.</li>
+                  <li>If a question could mean two things, you will be asked which one you meant.</li>
+                </ul>
+              </HowTo>
               {detail.problems.length > 0 && detail.can_edit && <Callout kind="warn"><span>{detail.problems.length} definition{detail.problems.length > 1 ? "s are" : " is"} switched off. Check the Definitions page.</span></Callout>}
             </div>
           )}
